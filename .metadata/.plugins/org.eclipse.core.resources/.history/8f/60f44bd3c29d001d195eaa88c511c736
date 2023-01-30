@@ -1,0 +1,6 @@
+package com.eshop.platform.controller;
+
+@RestController
+public class UserController {
+
+}

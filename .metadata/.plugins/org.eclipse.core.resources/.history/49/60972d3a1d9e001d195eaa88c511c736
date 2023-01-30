@@ -1,0 +1,5 @@
+package com.eshop.platform.service;
+
+public class UserService {
+
+}

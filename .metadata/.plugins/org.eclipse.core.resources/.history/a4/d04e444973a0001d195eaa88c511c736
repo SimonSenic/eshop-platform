@@ -1,0 +1,11 @@
+package com.eshop.platform.constants;
+
+public class UserConstants {
+	public static final String USERNAME_LENGTH = "Username's length must be between 3 - 30 characters";
+	public static final String PASSWORD_REGEXP = "^(?=.*\\\\\\\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{7,50}$";
+	public static final String PASSWORD_MSG = "Password's length must be between 7 - 50 characters "
+			+ "and contain at least 1 numeric value, 1 uppercase character and 1 special symbol";
+	public static final String EMAIL_REGEXP = "[a-z0-9._%+-]+@[a-z0-9.-]+\\\\.[a-z]{2,3}";
+	public static final String EMAIL_MSG = "";
+	
+}

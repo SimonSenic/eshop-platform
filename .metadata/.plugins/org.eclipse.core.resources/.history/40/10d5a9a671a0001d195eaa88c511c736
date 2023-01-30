@@ -1,0 +1,5 @@
+package com.eshop.platform.constants;
+
+public class UserConstants {
+	
+}

@@ -1,0 +1,12 @@
+package com.eshop.platform;
+
+public class UserDTO {
+	private Long id;
+	private String username;
+	private String password;
+	private String email;
+	private String firstName;
+	private String lastName;
+	private String address;
+	private Role role;
+}

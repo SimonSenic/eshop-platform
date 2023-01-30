@@ -1,0 +1,5 @@
+package com.eshop.platform.repository;
+
+public class UserRepository {
+
+}

@@ -1,0 +1,8 @@
+package com.eshop.platform.repository;
+
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class UserRepository extends JpaRepository<User, Long>{
+
+}
