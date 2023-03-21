@@ -1,5 +1,0 @@
-package com.eshop.platform.constants;
-
-public class UserConstants {
-	public final String USERNAME_LENGTH = "Username's length must be between 3 - 30 characters";
-}
