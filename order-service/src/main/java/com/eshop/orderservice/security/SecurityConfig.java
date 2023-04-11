@@ -14,8 +14,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.eshop.orderservice.exception.AccessDeniedExceptionHandler;
+
+import feign.RequestInterceptor;
+import feign.RequestTemplate;
 
 @Configuration
 @EnableWebSecurity
@@ -25,10 +30,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.authorizeHttpRequests().requestMatchers(GET, "/order-service/orders").hasAnyAuthority("ADMIN");
-        http.authorizeHttpRequests().requestMatchers(GET, "/order-service/orders/**").hasAnyAuthority("ADMIN", "CUSTOMER");
+        http.authorizeHttpRequests().requestMatchers(GET, "/order-service/orders/my").hasAnyAuthority("CUSTOMER");
+        http.authorizeHttpRequests().requestMatchers(GET, "/order-service/orders/{id}").hasAnyAuthority("ADMIN", "CUSTOMER");
+        http.authorizeHttpRequests().requestMatchers(PATCH, "/order-service/orders/{id}/process").hasAnyAuthority("ADMIN");
         http.authorizeHttpRequests().requestMatchers("/order-service/orders/**").hasAnyAuthority("CUSTOMER");
-        http.authorizeHttpRequests().requestMatchers(PATCH, "/order-service/orders/confirm/**").hasAnyAuthority("ADMIN");
-        http.authorizeHttpRequests().requestMatchers(PATCH, "/order-service/orders/complete/**").hasAnyAuthority("ADMIN");
+        //http.authorizeHttpRequests().requestMatchers("/**").permitAll();
         http.exceptionHandling().accessDeniedHandler(accessDeniedHandler());
         http.authorizeHttpRequests().anyRequest().authenticated();
         http.addFilterBefore(new AuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -44,5 +50,18 @@ public class SecurityConfig {
 	public AccessDeniedHandler accessDeniedHandler() {
 		return new AccessDeniedExceptionHandler();
 	}
+	
+	@Bean
+    public RequestInterceptor bearerTokenRequestInterceptor() {
+        return new RequestInterceptor() {
+            @Override
+            public void apply(RequestTemplate template) {
+            	if(!template.headers().containsKey("Authorization")) {
+            		template.header("Authorization", ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+            				.getRequest().getHeader("Authorization"));
+            	}
+            }
+        };
+    }
 	
 }

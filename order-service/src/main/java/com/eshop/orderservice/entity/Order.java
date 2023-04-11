@@ -14,11 +14,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "orders")
 @AllArgsConstructor
+@RequiredArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -28,11 +30,11 @@ public class Order extends BaseEntity {
 	private Long userId;
 	
 	@OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@NonNull
 	private List<Item> cart;
 	
 	@Column
-	@NonNull
-	private Double price;
+	private Double totalPrice;
 	
 	@Enumerated(EnumType.STRING)
 	@Column

@@ -1,6 +1,7 @@
 package com.eshop.storageservice.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.data.domain.Page;
@@ -16,5 +17,6 @@ public interface ProductMapper {
 		return products.map(product -> toDTO(product));
 	}
 	
-	Product updateProduct(@MappingTarget Product product, ProductDTO productDTO);
+	@Mapping(target = "availability", expression = "java(product.getAvailability() + increase)")
+	Product updateProduct(@MappingTarget Product product, ProductDTO productDTO, Integer increase);
 }

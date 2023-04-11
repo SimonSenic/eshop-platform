@@ -28,10 +28,11 @@ public class SecurityConfig {
 	@Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable();
-        http.authorizeHttpRequests().requestMatchers("/user-service/admin/**").hasAnyAuthority("ADMIN");
         http.authorizeHttpRequests().requestMatchers("/user-service/customer/**").permitAll();
+        http.authorizeHttpRequests().requestMatchers("/user-service/admin/**").hasAnyAuthority("ADMIN");
         http.authorizeHttpRequests().requestMatchers(POST, "/user-service/user/login").permitAll();
         http.authorizeHttpRequests().requestMatchers("/user-service/user/**").hasAnyAuthority("ADMIN", "CUSTOMER");
+        http.authorizeHttpRequests().requestMatchers("/**").permitAll();
         http.exceptionHandling().accessDeniedHandler(accessDeniedHandler());
         http.authorizeHttpRequests().anyRequest().authenticated();
         http.addFilterBefore(new AuthenticationFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class);

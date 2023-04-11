@@ -12,11 +12,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "items")
 @AllArgsConstructor
+@RequiredArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -27,6 +29,7 @@ public class Item {
 	
 	@ManyToOne
     @JoinColumn(name = "orderId", nullable = false)
+	@NonNull
 	private Order order;
 
 	@Column
@@ -34,11 +37,9 @@ public class Item {
 	private Long productId;
 	
 	@Column
-	@NonNull
-	private Long amount;
+	private Integer amount;
 	
 	@Column
-	@NonNull
 	private Double price;
 	
 }

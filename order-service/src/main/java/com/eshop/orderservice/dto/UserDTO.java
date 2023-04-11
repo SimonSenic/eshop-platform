@@ -1,8 +1,10 @@
 package com.eshop.orderservice.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class UserDTO {
 	private Long id;
 	
@@ -17,4 +19,6 @@ public class UserDTO {
 	private String lastName;
 	
 	private String address;
+	
+	private Role role;
 }

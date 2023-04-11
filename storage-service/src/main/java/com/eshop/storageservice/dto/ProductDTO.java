@@ -5,9 +5,11 @@ import org.hibernate.validator.constraints.Range;
 import static com.eshop.storageservice.dto.ProductConstants.*;
 
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class ProductDTO {
 	private Long id;
 	

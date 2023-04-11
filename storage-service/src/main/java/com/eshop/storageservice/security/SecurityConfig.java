@@ -1,7 +1,7 @@
 package com.eshop.storageservice.security;
 
 import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.PATCH;
+import static org.springframework.http.HttpMethod.POST;
 
 import java.util.Optional;
 
@@ -24,9 +24,10 @@ public class SecurityConfig {
 	@Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable();
-        http.authorizeHttpRequests().requestMatchers("/storage-service/products/**").hasAnyAuthority("ADMIN");
-        http.authorizeHttpRequests().requestMatchers(PATCH, "/storage-service/products/order/**").hasAnyAuthority("CUSTOMER");
         http.authorizeHttpRequests().requestMatchers(GET, "/storage-service/products/**").permitAll();
+        http.authorizeHttpRequests().requestMatchers(POST, "/storage-service/products/{id}/order").hasAnyAuthority("CUSTOMER");
+        http.authorizeHttpRequests().requestMatchers("/storage-service/products/**").hasAnyAuthority("ADMIN");
+        http.authorizeHttpRequests().requestMatchers("/**").permitAll();
         http.exceptionHandling().accessDeniedHandler(accessDeniedHandler());
         http.authorizeHttpRequests().anyRequest().authenticated();
         http.addFilterBefore(new AuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);

@@ -73,7 +73,7 @@ public class UserService implements UserDetailsService{
 				.orElseThrow(() -> new NotFoundException("User not found"));
 		if(user.getPassword() != null && !passwordEncoder.matches(updateUserDTO.getPassword(), user.getPassword())) { 
 			throw new BusinessException("Invalid password");
-		}else if(updateUserDTO.getNewPassword().equals(updateUserDTO.getPassword())) {
+		}else if(updateUserDTO.getPassword().equals(updateUserDTO.getNewPassword())) {
 			throw new BusinessException("New password must not be the same");
 		}
 		

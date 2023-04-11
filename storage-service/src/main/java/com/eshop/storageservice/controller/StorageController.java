@@ -30,7 +30,7 @@ public class StorageController {
 		return ResponseEntity.ok(storageService.getProducts(pageable));
 	}
 	
-	@GetMapping("/id")
+	@GetMapping("/{id}")
 	public ResponseEntity<ProductDTO> getProduct(@PathVariable(value = "id") Long id){
 		return ResponseEntity.ok(storageService.getProduct(id));
 	}
@@ -40,14 +40,15 @@ public class StorageController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(storageService.addProduct(productDTO));
 	}
 	
-	@PatchMapping("/edit/{id}")
-	public ResponseEntity<ProductDTO> editProduct(@PathVariable(value = "id") Long id, @RequestBody @Valid ProductDTO productDTO){
-		return ResponseEntity.ok(storageService.editProduct(id, productDTO));
+	@PatchMapping("/{id}/update")
+	public ResponseEntity<ProductDTO> updateProduct(@PathVariable(value = "id") Long id, @RequestBody @Valid ProductDTO productDTO,
+			@RequestParam(required = false, defaultValue = "0") Integer increase){
+		return ResponseEntity.ok(storageService.updateProduct(id, productDTO, increase));
 	}
 	
-	@PatchMapping("/order/{id}") //pridavanie viac produktov do kosika, userAuthentication, refund, admin spracuje ordery - dalsi state
-	//order service consumne msg a checkne ci existuje order v draft state (kosik?), ak je, prida, inak vytvori novy draft order?
-	public ResponseEntity<ProductDTO> orderProduct(@PathVariable(value = "id") Long id, @RequestParam(required = false) Integer amount){
+	@PostMapping("/{id}/order")
+	public ResponseEntity<ProductDTO> orderProduct(@PathVariable(value = "id") Long id, 
+			@RequestParam(required = false, defaultValue = "1") Integer amount){
 		return ResponseEntity.ok(storageService.orderProduct(id, amount));
 	}
 }

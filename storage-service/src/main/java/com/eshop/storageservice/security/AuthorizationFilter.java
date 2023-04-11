@@ -10,6 +10,8 @@ import java.util.Map;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.auth0.jwt.JWT;
@@ -44,8 +46,9 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                     Arrays.stream(roles).forEach(role -> authorities.add(new SimpleGrantedAuthority(role)));
 
                     UsernamePasswordAuthenticationToken authenticationToken =
-                            new UsernamePasswordAuthenticationToken(username, null, authorities);
+                            new UsernamePasswordAuthenticationToken(username, null, authorities);                                
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));   
                     filterChain.doFilter(request, response);
                 }catch (Exception e){
                     Map<String, String> map = new HashMap<>();

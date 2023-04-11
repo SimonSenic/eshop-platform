@@ -43,11 +43,11 @@ public class StorageService {
 		return productMapper.toDTO(product);
 	}
 	
-	public ProductDTO editProduct(Long id, ProductDTO productDTO) {
+	public ProductDTO updateProduct(Long id, ProductDTO productDTO, Integer increase) {
 		Product product = storageRepository.findById(id)
 				.orElseThrow(() -> new NotFoundException("Product not found"));
 		
-		product = productMapper.updateProduct(product, productDTO);
+		product = productMapper.updateProduct(product, productDTO, increase);
 		storageRepository.save(product);
 		return productMapper.toDTO(product);
 	}
@@ -55,15 +55,12 @@ public class StorageService {
 	public ProductDTO orderProduct(Long id, Integer amount) {
 		Product product = storageRepository.findById(id)
 				.orElseThrow(() -> new NotFoundException("Product not found"));
-		if(amount == null) { 
-			amount = 1;
-		}else if(amount > product.getAvailability() || amount < 1) {
-			throw new BusinessException("Invalid amount");
+		if(amount < 1) {
+			throw new BusinessException("Invalid amount"); //
 		}
 		
-		storageRepository.save(product);
 		ProductDTO productDTO = productMapper.toDTO(product);
-		try { producer.sendMessage(productDTO, userAuthentication.getAuthentication().getName(), amount); }
+		try { producer.sendMessage(productDTO, amount, userAuthentication.getRequest().getHeader("Authorization")); }
 		catch(JsonProcessingException e) { e.printStackTrace(); }
 		return productDTO;
 	}

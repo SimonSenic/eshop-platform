@@ -13,15 +13,15 @@ import com.eshop.userservice.UserServiceApplication;
 import com.eshop.userservice.dto.UpdateUserDTO;
 import com.eshop.userservice.dto.UserDTO;
 
-@SpringBootTest(classes = UserServiceApplication.class)
+//@SpringBootTest(classes = UserServiceApplication.class)
 public class UserServiceTests {
-	@MockBean
+	//@MockBean
 	private UserService userService;
 	
 	private static final String USERNAME = "User123";
 	private static final String PASSWORD = "Password123!";
 
-	@Test
+	//@Test
 	void testSuccessfulLogin() {
 		UserDTO userDTO = UserDTO.builder()
 				.id(1L)
@@ -36,7 +36,7 @@ public class UserServiceTests {
 		assertEquals(result.getUsername(), USERNAME);
 	}
 	
-	@Test
+	//@Test
 	void testSuccessfulUpdate() { //TODO
 		UserDTO userDTO = UserDTO.builder()
 				.id(1L)

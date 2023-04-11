@@ -1,17 +1,28 @@
 package com.eshop.orderservice.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.eshop.orderservice.dto.OrderDTO;
+import com.eshop.orderservice.dto.ProductDTO;
+import com.eshop.orderservice.dto.UserDTO;
+import com.eshop.orderservice.entity.Item;
 import com.eshop.orderservice.entity.Order;
 import com.eshop.orderservice.entity.State;
 import com.eshop.orderservice.exception.BusinessException;
 import com.eshop.orderservice.exception.NotFoundException;
 import com.eshop.orderservice.mapper.OrderMapper;
+import com.eshop.orderservice.repository.ItemRepository;
 import com.eshop.orderservice.repository.OrderRepository;
 
 import lombok.AllArgsConstructor;
@@ -20,6 +31,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class OrderService {
 	private final OrderRepository orderRepository;
+	private final ItemRepository itemRepository;
 	private final OrderMapper orderMapper;
 	private final ApiClient apiClient;
 	
@@ -33,42 +45,84 @@ public class OrderService {
 		return orderMapper.toDTO(order);
 	}
 	
-	public List<OrderDTO> getUserOrders(){
-		List<Order> orders = orderRepository.findByUserId(apiClient.getUserProfile().getId());
+	public List<OrderDTO> getMyOrders(){
+		List<Order> orders = orderRepository.findByUserId(apiClient.getUserProfile().getBody().getId());
 		return orderMapper.toDTOs(orders);
 	}
 	
-	public OrderDTO cancelOrder(Long id) { // availability refund ?
+	@Transactional
+	public OrderDTO updateOrder(Long id, Long productId, Integer amount) {
 		Order order = orderRepository.findById(id)
 				.orElseThrow(() -> new NotFoundException("Order not found"));
-		//if(order.getState().equals())
+		if(!order.getState().equals(State.DRAFT)) {
+			throw new BusinessException("Invalid order");	
+		}
+		
+		if(productId != null) {
+			Item item = itemRepository.findByOrderIdAndProductId(id, productId).get();
+			item.setAmount(amount);
+			item.setPrice(apiClient.getProduct(productId).getBody().getPrice() * amount);
+			order.setTotalPrice(0.0);
+			order.getCart().forEach(temp -> order.setTotalPrice(order.getTotalPrice() + temp.getPrice()));
+		}else { //else if amount 0
+			itemRepository.deleteByOrderId(id);
+			order.setTotalPrice(0.0);
+		}
+		
+		orderRepository.save(order);
+		return orderMapper.toDTO(order);
+	}
+	
+	@Transactional
+	public OrderDTO cancelOrder(Long id) {
+		Order order = orderRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Order not found"));
+		if(order.getState().equals(State.ORDER) || order.getState().equals(State.CONFIRMED)) {
+			order.getCart().forEach(item -> {
+				apiClient.updateProduct(item.getProductId(), null, item.getAmount()); 
+			});
+		}
 		
 		order.setState(State.CANCELLED);
 		orderRepository.save(order);
 		return orderMapper.toDTO(order);
 	}
 	
-	public OrderDTO confirmOrder(Long id) {
+	public OrderDTO processOrder(Long id, State state) {
 		Order order = orderRepository.findById(id)
 				.orElseThrow(() -> new NotFoundException("Order not found"));
-		if(!order.getState().equals(State.ORDER)) {
+		if(order.getState().equals(State.ORDER) && !state.equals(State.CONFIRMED)
+				|| order.getState().equals(State.CONFIRMED) && !state.equals(State.COMPLETED)) {
 			throw new BusinessException("Invalid order state");
 		}
 		
-		order.setState(State.CONFIRMED);
+		order.setState(state);
 		orderRepository.save(order);
 		return orderMapper.toDTO(order);
 	}
 	
-	public OrderDTO completeOrder(Long id) {
-		Order order = orderRepository.findById(id)
-				.orElseThrow(() -> new NotFoundException("Order not found"));
-		if(!order.getState().equals(State.CONFIRMED)) {
-			throw new BusinessException("Invalid order state");
-		}
+	@Transactional
+	public void createOrder(ProductDTO product, Integer amount, String token) {
+		UserDTO user = apiClient.getUserProfile(token).getBody();
+		List<SimpleGrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority(user.getRole().name()));
+		Authentication auth = new UsernamePasswordAuthenticationToken(user.getUsername(), null, authorities);
+		SecurityContextHolder.getContext().setAuthentication(auth);
 		
-		order.setState(State.COMPLETED);
+		Order order = orderRepository.findByUserIdAndState(user.getId(), State.DRAFT)
+				.orElse(new Order(user.getId(), new ArrayList<Item>(), State.DRAFT));
+		Item item = itemRepository.findByOrderIdAndProductId(order.getId(), product.getId())
+				.orElse(new Item(order, product.getId()));
+		
+		if(order.getCart().contains(item)) {
+			item.setAmount(item.getAmount() + amount);
+			item.setPrice(item.getPrice() + product.getPrice() * amount);
+		}else {
+			item.setAmount(amount);
+			item.setPrice(product.getPrice() * amount);
+			order.getCart().add(item);
+		}
+		order.setTotalPrice(0.0);
+		order.getCart().forEach(temp -> order.setTotalPrice(order.getTotalPrice() + temp.getPrice()));
 		orderRepository.save(order);
-		return orderMapper.toDTO(order);
 	}
 }

@@ -4,9 +4,11 @@ import java.util.List;
 
 import com.eshop.orderservice.entity.State;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class OrderDTO {
 	private Long id;
 	
@@ -14,7 +16,7 @@ public class OrderDTO {
 	
 	private List<ItemDTO> cart;
 	
-	private Double price;
+	private Double totalPrice;
 	
 	private State state;
 }
