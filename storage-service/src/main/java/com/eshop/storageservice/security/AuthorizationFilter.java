@@ -10,8 +10,6 @@ import java.util.Map;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.auth0.jwt.JWT;
@@ -30,35 +28,30 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 	@Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
-        if(request.getServletPath().equals("/user-service/user/login")) {
-            filterChain.doFilter(request, response);
-        }else{
-            String header = request.getHeader("Authorization");
-            if(header != null && header.startsWith("Bearer ")){
-                try{
-                    Algorithm algorithm = Algorithm.HMAC256("${secret.key}".getBytes());
-                    String token = header.substring(7);
-                    JWTVerifier verifier = JWT.require(algorithm).build();
-                    DecodedJWT decodedJWT = verifier.verify(token);
-                    String username = decodedJWT.getSubject();
-                    String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
-                    List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-                    Arrays.stream(roles).forEach(role -> authorities.add(new SimpleGrantedAuthority(role)));
+		String header = request.getHeader("Authorization");
+        if(header != null && header.startsWith("Bearer ")){
+            try{
+                Algorithm algorithm = Algorithm.HMAC256("${secret.key}".getBytes());
+                String token = header.substring(7);
+                JWTVerifier verifier = JWT.require(algorithm).build();
+                DecodedJWT decodedJWT = verifier.verify(token);
+                String username = decodedJWT.getSubject();
+                String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
+                List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                Arrays.stream(roles).forEach(role -> authorities.add(new SimpleGrantedAuthority(role)));
 
-                    UsernamePasswordAuthenticationToken authenticationToken =
-                            new UsernamePasswordAuthenticationToken(username, null, authorities);                                
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));   
-                    filterChain.doFilter(request, response);
-                }catch (Exception e){
-                    Map<String, String> map = new HashMap<>();
-                    map.put("error", e.getMessage());
-                    response.setStatus(401);
-                    response.setContentType("application/json");
-                    new ObjectMapper().writeValue(response.getOutputStream(), map);
-                }
-            }else filterChain.doFilter(request, response);
-        }
+                UsernamePasswordAuthenticationToken authenticationToken =
+                        new UsernamePasswordAuthenticationToken(username, null, authorities);                                
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                filterChain.doFilter(request, response);
+            }catch (Exception e){
+                Map<String, String> map = new HashMap<>();
+                map.put("error", e.getMessage());
+                response.setStatus(401);
+                response.setContentType("application/json");
+                new ObjectMapper().writeValue(response.getOutputStream(), map);
+            }
+        }else filterChain.doFilter(request, response);
 
     }
 }

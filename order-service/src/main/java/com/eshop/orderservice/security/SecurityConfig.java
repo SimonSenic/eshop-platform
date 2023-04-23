@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -43,7 +44,10 @@ public class SecurityConfig {
 	
 	@Bean
 	public AuditorAware<String> auditorAware(){
-		return () -> Optional.of(SecurityContextHolder.getContext().getAuthentication().getName());
+		return () -> {
+		    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		    return Optional.ofNullable(auth).map(temp -> temp.getName());
+		};
 	}
 	
 	@Bean
@@ -56,7 +60,7 @@ public class SecurityConfig {
         return new RequestInterceptor() {
             @Override
             public void apply(RequestTemplate template) {
-            	if(!template.headers().containsKey("Authorization")) {
+            	if(!template.headers().containsKey("Authorization") && !template.url().contains("/update-availability")) {
             		template.header("Authorization", ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
             				.getRequest().getHeader("Authorization"));
             	}

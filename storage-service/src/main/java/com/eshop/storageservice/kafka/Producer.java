@@ -15,19 +15,19 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class Producer {
 	@NonNull
-	private KafkaTemplate<String, String> kafkaTemplate;
+	private final KafkaTemplate<String, String> kafkaTemplate;
 	
 	@NonNull
-	private ObjectMapper objectMapper;
+	private final ObjectMapper objectMapper;
 	
-	@Value("${order.topic.name}")
-	private String orderTopic;
+	@Value("${product.topic.name}")
+	private String productTopic;
 	
 	public void sendMessage(ProductDTO product, Integer amount, String token) throws JsonProcessingException{
 		StringBuilder sb = new StringBuilder();
 		sb.append(objectMapper.writeValueAsString(product) +"\n");
 		sb.append(amount +"\n");
 		sb.append(token);
-		kafkaTemplate.send(orderTopic, sb.toString());
+		kafkaTemplate.send(productTopic, sb.toString());
 	}
 }

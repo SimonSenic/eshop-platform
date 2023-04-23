@@ -30,9 +30,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class UserService implements UserDetailsService{
 	private final UserRepository userRepository;
 	private final UserMapper userMapper;
@@ -71,7 +73,7 @@ public class UserService implements UserDetailsService{
 	public UserDTO updateUser(UpdateUserDTO updateUserDTO) {
 		User user = userRepository.findByUsername(userAuthentication.getAuthentication().getName())
 				.orElseThrow(() -> new NotFoundException("User not found"));
-		if(user.getPassword() != null && !passwordEncoder.matches(updateUserDTO.getPassword(), user.getPassword())) { 
+		if(!passwordEncoder.matches(updateUserDTO.getPassword(), user.getPassword())) { 
 			throw new BusinessException("Invalid password");
 		}else if(updateUserDTO.getPassword().equals(updateUserDTO.getNewPassword())) {
 			throw new BusinessException("New password must not be the same");
@@ -79,6 +81,7 @@ public class UserService implements UserDetailsService{
 		
 		user = userMapper.updateUser(user, updateUserDTO);
 		userRepository.save(user);
+		log.info("User updated successfully (userId: {})", user.getId());
 		return userMapper.toDTO(user);
 	}
 	

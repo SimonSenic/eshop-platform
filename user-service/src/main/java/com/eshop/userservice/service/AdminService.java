@@ -10,9 +10,11 @@ import com.eshop.userservice.mapper.UserMapper;
 import com.eshop.userservice.repository.UserRepository;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class AdminService {
 	private final UserRepository userRepository;
 	private final UserMapper userMapper;
@@ -26,6 +28,7 @@ public class AdminService {
 		
 		User user = new User(userDTO.getUsername(), userDTO.getEmail(), Role.ADMIN);
 		userRepository.save(user);
+		log.info("Admin created successfully (userId: {})", user.getId());
 		return userMapper.toDTO(user);
 	}
 

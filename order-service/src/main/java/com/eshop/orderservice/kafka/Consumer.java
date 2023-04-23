@@ -17,18 +17,24 @@ import lombok.AllArgsConstructor;
 @Component
 @AllArgsConstructor
 public class Consumer {
-	private OrderService orderService;
-	private ObjectMapper objectMapper;
+	private final OrderService orderService;
+	private final ObjectMapper objectMapper;
 	
-	private final String orderTopic = "${order.topic.name}";
-	//private final String paymentTopic = "${payment.topic.name}";
+	private final String productTopic = "${product.topic.name}";
+	private final String paymentTopic = "${payment.topic.name}";
 	
-	@KafkaListener(topics = orderTopic)
-	public void consumeOrder(String message) throws JsonProcessingException, IOException {
+	@KafkaListener(topics = productTopic)
+	public void consumeProduct(String message) throws JsonProcessingException, IOException {
 		BufferedReader reader = new BufferedReader(new StringReader(message));
 		ProductDTO product = objectMapper.readValue(reader.readLine(), ProductDTO.class);
 		Integer amount = Integer.valueOf(reader.readLine());
 		String token = reader.readLine();
 		orderService.createOrder(product, amount, token);
+	}
+	
+	@KafkaListener(topics = paymentTopic)
+	public void consumePayment(String message) throws IOException {
+		Long orderId = Long.valueOf(message);
+		orderService.completePayment(orderId);
 	}
 }

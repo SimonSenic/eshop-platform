@@ -30,7 +30,7 @@ public class OrderController {
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<OrderDTO> getOrder(@PathVariable(value = "id") Long id){
+	public ResponseEntity<OrderDTO> getOrder(@PathVariable Long id){
 		return ResponseEntity.ok(orderService.getOrder(id));
 	}
 	
@@ -40,18 +40,18 @@ public class OrderController {
 	}
 	
 	@PatchMapping("/{id}/update")
-	public ResponseEntity<OrderDTO> updateOrder(@PathVariable(value = "id") Long id, 
-			@RequestParam(required = false) Long productId, @RequestParam(required = false) Integer amount){ //dto?
+	public ResponseEntity<OrderDTO> updateOrder(@PathVariable Long id, 
+			@RequestParam(required = false) Long productId, @RequestParam(required = false, defaultValue = "0") Integer amount){
 		return ResponseEntity.ok(orderService.updateOrder(id, productId, amount));
 	}
 	
 	@PatchMapping("/{id}/cancel")
-	public ResponseEntity<OrderDTO> cancelOrder(@PathVariable(value = "id") Long id){
+	public ResponseEntity<OrderDTO> cancelOrder(@PathVariable Long id){
 		return ResponseEntity.ok(orderService.cancelOrder(id)); 
 	}
 	
 	@PatchMapping("/{id}/process")
-	public ResponseEntity<OrderDTO> processOrder(@PathVariable(value = "id") Long id, @RequestParam State state){
+	public ResponseEntity<OrderDTO> processOrder(@PathVariable Long id, @RequestParam State state){
 		return ResponseEntity.ok(orderService.processOrder(id, state));
 	}
 }

@@ -28,10 +28,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 	@Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
-        if(request.getServletPath().equals("/user-service/user/login")) {
-            filterChain.doFilter(request, response);
-        }else{
-            String header = request.getHeader("Authorization");
+		String header = request.getHeader("Authorization");
             if(header != null && header.startsWith("Bearer ")){
                 try{
                     Algorithm algorithm = Algorithm.HMAC256("${secret.key}".getBytes());
@@ -55,7 +52,6 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                     new ObjectMapper().writeValue(response.getOutputStream(), map);
                 }
             }else filterChain.doFilter(request, response);
-        }
 
     }
 }

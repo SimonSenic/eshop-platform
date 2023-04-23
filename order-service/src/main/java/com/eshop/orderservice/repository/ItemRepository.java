@@ -13,5 +13,5 @@ public interface ItemRepository extends JpaRepository<Item, Long>{
 	
 	@Modifying
     @Query("DELETE FROM Item i WHERE i.order.id = :orderId")
-	void deleteByOrderId(Long orderId);
+	void deleteAllByOrderId(Long orderId);
 }

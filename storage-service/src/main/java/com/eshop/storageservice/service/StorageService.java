@@ -14,9 +14,11 @@ import com.eshop.storageservice.repository.StorageRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class StorageService {
 	private final StorageRepository storageRepository;
 	private final ProductMapper productMapper;
@@ -40,29 +42,43 @@ public class StorageService {
 		
 		Product product = new Product(productDTO.getName(), productDTO.getPrice(), productDTO.getAvailability());
 		storageRepository.save(product);
+		log.info("Product added successfully (productId: {})", product.getId());
 		return productMapper.toDTO(product);
 	}
 	
-	public ProductDTO updateProduct(Long id, ProductDTO productDTO, Integer increase) {
+	public ProductDTO updateProduct(Long id, ProductDTO productDTO) {
 		Product product = storageRepository.findById(id)
 				.orElseThrow(() -> new NotFoundException("Product not found"));
 		
-		product = productMapper.updateProduct(product, productDTO, increase);
+		product = productMapper.updateProduct(product, productDTO);
 		storageRepository.save(product);
+		log.info("Product updated successfully (productId: {})", product.getId());
 		return productMapper.toDTO(product);
 	}
 	
-	public ProductDTO orderProduct(Long id, Integer amount) {
+	public void orderProduct(Long id, Integer amount) {
 		Product product = storageRepository.findById(id)
 				.orElseThrow(() -> new NotFoundException("Product not found"));
-		if(amount < 1) {
-			throw new BusinessException("Invalid amount"); //
+		if(amount == null || amount < 1) {
+			throw new BusinessException("Invalid amount");
 		}
 		
 		ProductDTO productDTO = productMapper.toDTO(product);
 		try { producer.sendMessage(productDTO, amount, userAuthentication.getRequest().getHeader("Authorization")); }
 		catch(JsonProcessingException e) { e.printStackTrace(); }
-		return productDTO;
+	}
+	
+	public void updateAvailability(Long id, Integer increase) {
+		Product product = storageRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Product not found"));
+		Integer result = product.getAvailability() + increase;
+		
+		if(result >= 0) {
+			product.setAvailability(result);
+		}else {
+			product.setAvailability(0);
+		}
+		storageRepository.save(product);
 	}
 	
 }

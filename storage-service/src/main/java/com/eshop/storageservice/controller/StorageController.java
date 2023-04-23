@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,7 +32,7 @@ public class StorageController {
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<ProductDTO> getProduct(@PathVariable(value = "id") Long id){
+	public ResponseEntity<ProductDTO> getProduct(@PathVariable Long id){
 		return ResponseEntity.ok(storageService.getProduct(id));
 	}
 	
@@ -41,14 +42,18 @@ public class StorageController {
 	}
 	
 	@PatchMapping("/{id}/update")
-	public ResponseEntity<ProductDTO> updateProduct(@PathVariable(value = "id") Long id, @RequestBody @Valid ProductDTO productDTO,
-			@RequestParam(required = false, defaultValue = "0") Integer increase){
-		return ResponseEntity.ok(storageService.updateProduct(id, productDTO, increase));
+	public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @RequestBody @Valid ProductDTO productDTO){
+		return ResponseEntity.ok(storageService.updateProduct(id, productDTO));
 	}
 	
 	@PostMapping("/{id}/order")
-	public ResponseEntity<ProductDTO> orderProduct(@PathVariable(value = "id") Long id, 
+	public void orderProduct(@PathVariable Long id, 
 			@RequestParam(required = false, defaultValue = "1") Integer amount){
-		return ResponseEntity.ok(storageService.orderProduct(id, amount));
+		storageService.orderProduct(id, amount);
+	}
+	
+	@PutMapping("/{id}/update-availability")
+	public void updateAvailability(@PathVariable Long id, @RequestParam Integer increase) {
+		storageService.updateAvailability(id, increase);
 	}
 }

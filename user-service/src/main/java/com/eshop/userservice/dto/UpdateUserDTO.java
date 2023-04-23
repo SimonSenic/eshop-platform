@@ -2,9 +2,8 @@ package com.eshop.userservice.dto;
 
 import static com.eshop.userservice.dto.UserConstants.*;
 
-import com.eshop.userservice.entity.Role;
-
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
@@ -16,6 +15,7 @@ public class UpdateUserDTO {
     @Size(min = 3, max = 30, message = USERNAME_SIZE)
 	private String username;
 	
+    @NotNull(message = PASSWORD_NOT_NULL)
     @Pattern(regexp = PASSWORD_REGEXP, message = PASSWORD_MSG)
 	private String password;
     

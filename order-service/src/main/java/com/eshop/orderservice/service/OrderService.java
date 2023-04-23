@@ -26,9 +26,11 @@ import com.eshop.orderservice.repository.ItemRepository;
 import com.eshop.orderservice.repository.OrderRepository;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class OrderService {
 	private final OrderRepository orderRepository;
 	private final ItemRepository itemRepository;
@@ -59,17 +61,24 @@ public class OrderService {
 		}
 		
 		if(productId != null) {
-			Item item = itemRepository.findByOrderIdAndProductId(id, productId).get();
-			item.setAmount(amount);
-			item.setPrice(apiClient.getProduct(productId).getBody().getPrice() * amount);
+			Item item = itemRepository.findByOrderIdAndProductId(id, productId)
+					.orElseThrow(() -> new NotFoundException("Item not found"));
+			if(amount != null && amount != 0) {
+				item.setAmount(amount);
+				item.setPrice(apiClient.getProduct(productId).getBody().getPrice() * amount);
+			}else {
+				order.getCart().remove(item);
+				itemRepository.delete(item);
+			}
 			order.setTotalPrice(0.0);
 			order.getCart().forEach(temp -> order.setTotalPrice(order.getTotalPrice() + temp.getPrice()));
-		}else { //else if amount 0
-			itemRepository.deleteByOrderId(id);
+		}else {
+			itemRepository.deleteAllByOrderId(id);
 			order.setTotalPrice(0.0);
 		}
 		
 		orderRepository.save(order);
+		log.info("Order updated successfully (orderId: {})", id);
 		return orderMapper.toDTO(order);
 	}
 	
@@ -77,27 +86,27 @@ public class OrderService {
 	public OrderDTO cancelOrder(Long id) {
 		Order order = orderRepository.findById(id)
 				.orElseThrow(() -> new NotFoundException("Order not found"));
-		if(order.getState().equals(State.ORDER) || order.getState().equals(State.CONFIRMED)) {
-			order.getCart().forEach(item -> {
-				apiClient.updateProduct(item.getProductId(), null, item.getAmount()); 
-			});
+		if(!order.getState().equals(State.ORDER) && !order.getState().equals(State.CONFIRMED)) {
+			throw new BusinessException("Invalid order state");
 		}
 		
 		order.setState(State.CANCELLED);
+		order.getCart().forEach(item -> apiClient.updateAvailability(item.getProductId(), item.getAmount()));
 		orderRepository.save(order);
+		log.info("Order cancelled successfully (orderId: {})", id);
 		return orderMapper.toDTO(order);
 	}
 	
 	public OrderDTO processOrder(Long id, State state) {
 		Order order = orderRepository.findById(id)
 				.orElseThrow(() -> new NotFoundException("Order not found"));
-		if(order.getState().equals(State.ORDER) && !state.equals(State.CONFIRMED)
-				|| order.getState().equals(State.CONFIRMED) && !state.equals(State.COMPLETED)) {
+		if(order.getState().equals(State.DRAFT) || state.equals(State.DRAFT)) {
 			throw new BusinessException("Invalid order state");
 		}
 		
 		order.setState(state);
 		orderRepository.save(order);
+		log.info("Order state changed successfully (orderId: {})", id);
 		return orderMapper.toDTO(order);
 	}
 	
@@ -123,6 +132,20 @@ public class OrderService {
 		}
 		order.setTotalPrice(0.0);
 		order.getCart().forEach(temp -> order.setTotalPrice(order.getTotalPrice() + temp.getPrice()));
+		orderRepository.save(order);
+		log.info("Product added to cart successfully (productId: {})", product.getId());
+	}
+	
+	@Transactional
+	public void completePayment(Long orderId) {
+		Order order = orderRepository.findById(orderId)
+				.orElseThrow(() -> new NotFoundException("Order not found"));
+		if(!order.getState().equals(State.DRAFT)) {
+			throw new BusinessException("Invalid order state");
+		}
+		
+		order.setState(State.ORDER);
+		order.getCart().forEach(item -> apiClient.updateAvailability(item.getProductId(), -item.getAmount()));
 		orderRepository.save(order);
 	}
 }
