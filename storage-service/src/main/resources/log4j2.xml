@@ -4,6 +4,12 @@
         <Kafka name="Kafka" topic="log">
             <PatternLayout pattern="%date %message"/>
             <Property name="bootstrap.servers">localhost:9092</Property>
+            <Property name="security.protocol">SSL</Property>
+            <Property name="ssl.endpoint.identification.algorithm"></Property>
+            <Property name="ssl.keystore.location">../configuration-service/ssl/keystore.jks</Property>
+            <Property name="ssl.keystore.password">password</Property>
+            <Property name="ssl.truststore.location">../configuration-service/ssl/truststore.jks</Property>
+            <Property name="ssl.truststore.password">password</Property>
         </Kafka>
         <Async name="Async">
             <AppenderRef ref="Kafka"/>
