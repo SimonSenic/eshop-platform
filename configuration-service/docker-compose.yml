@@ -7,19 +7,13 @@ networks:
 
 services:
   zookeeper:
-    image: wurstmeister/zookeeper
+    image: zookeeper
     container_name: zookeeper
     restart: "no"
     networks:
       - kafka-net
     ports:
       - "2181:2181"
-    environment:
-      ZOO_SSL_CLIENT_ENABLE: true
-      ZOO_SSL_TRUSTSTORE_LOCATION: /ssl/truststore.jks
-      ZOO_SSL_TRUSTSTORE_PASSWORD: password
-      ZOO_SSL_KEYSTORE_LOCATION: /ssl/keystore.jks
-      ZOO_SSL_KEYSTORE_PASSWORD: password
 
   kafka:
     image: wurstmeister/kafka

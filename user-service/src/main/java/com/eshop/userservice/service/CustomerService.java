@@ -1,5 +1,6 @@
 package com.eshop.userservice.service;
 
+import org.apache.logging.log4j.Level;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,7 @@ public class CustomerService {
 				userDTO.getFirstName(), userDTO.getLastName(), userDTO.getAddress(), Role.CUSTOMER);
 		userRepository.save(user);
 		log.info("Customer registration successful (userId: {})", user.getId());
+		//log.info("Send confirm registration email (userId: {})", user.getId());
 		return userMapper.toDTO(user);
 	}
 

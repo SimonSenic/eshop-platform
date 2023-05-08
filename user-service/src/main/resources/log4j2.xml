@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="info" name="kafka-logs" packages="com.eshop.userservice">
     <Appenders>
-        <Kafka name="Kafka" topic="log">
+        <Kafka name="Log" topic="log">
             <PatternLayout pattern="%date %message"/>
             <Property name="bootstrap.servers">localhost:9092</Property>
             <Property name="security.protocol">SSL</Property>
@@ -11,19 +11,54 @@
             <Property name="ssl.truststore.location">../configuration-service/ssl/truststore.jks</Property>
             <Property name="ssl.truststore.password">password</Property>
         </Kafka>
+        
+        <Kafka name="CustomerRegistration" topic="customer-registration">
+			<PatternLayout pattern="%date %message"/>
+			<Property name="bootstrap.servers">localhost:9092</Property>
+            <Property name="security.protocol">SSL</Property>
+            <Property name="ssl.endpoint.identification.algorithm"></Property>
+            <Property name="ssl.keystore.location">../configuration-service/ssl/keystore.jks</Property>
+            <Property name="ssl.keystore.password">password</Property>
+            <Property name="ssl.truststore.location">../configuration-service/ssl/truststore.jks</Property>
+            <Property name="ssl.truststore.password">password</Property>
+		</Kafka>
+		
+		<Kafka name="AdminCreation" topic="admin-creation">
+			<PatternLayout pattern="%date %message"/>
+			<Property name="bootstrap.servers">localhost:9092</Property>
+            <Property name="security.protocol">SSL</Property>
+            <Property name="ssl.endpoint.identification.algorithm"></Property>
+            <Property name="ssl.keystore.location">../configuration-service/ssl/keystore.jks</Property>
+            <Property name="ssl.keystore.password">password</Property>
+            <Property name="ssl.truststore.location">../configuration-service/ssl/truststore.jks</Property>
+            <Property name="ssl.truststore.password">password</Property>
+		</Kafka>
+        
         <Async name="Async">
-            <AppenderRef ref="Kafka"/>
+            <AppenderRef ref="Log"/>
+            <AppenderRef ref="CustomerRegistration"/>
+            <AppenderRef ref="AdminCreation"/>
         </Async>
 
         <Console name="stdout" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5p [%-7t] %F:%L - %m%n"/>
         </Console>
-
+        
     </Appenders>
     <Loggers>
         <Root level="INFO">
-            <AppenderRef ref="Kafka"/>
-            <AppenderRef ref="stdout"/>
+            <AppenderRef ref="Log"/>
+            <AppenderRef ref="CustomerRegistration">
+        		<Filters>
+          			<RegexFilter regex="^.*Customer registration successful.*$" onMatch="ACCEPT" onMismatch="DENY" />
+        		</Filters>
+      		</AppenderRef>
+      		<AppenderRef ref="AdminCreation">
+        		<Filters>
+          			<RegexFilter regex="^.*Admin created successfully.*$" onMatch="ACCEPT" onMismatch="DENY" />
+        		</Filters>
+      		</AppenderRef>
+      		<AppenderRef ref="stdout"/>
         </Root>
         <Logger name="org.apache.kafka" level="WARN" />
     </Loggers>

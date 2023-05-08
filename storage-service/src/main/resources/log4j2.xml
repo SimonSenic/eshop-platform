@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="info" name="kafka-logs" packages="com.eshop.storageservice">
     <Appenders>
-        <Kafka name="Kafka" topic="log">
+        <Kafka name="Log" topic="log">
             <PatternLayout pattern="%date %message"/>
             <Property name="bootstrap.servers">localhost:9092</Property>
             <Property name="security.protocol">SSL</Property>
@@ -11,8 +11,9 @@
             <Property name="ssl.truststore.location">../configuration-service/ssl/truststore.jks</Property>
             <Property name="ssl.truststore.password">password</Property>
         </Kafka>
+        
         <Async name="Async">
-            <AppenderRef ref="Kafka"/>
+            <AppenderRef ref="Log"/>
         </Async>
 
         <Console name="stdout" target="SYSTEM_OUT">
@@ -22,7 +23,7 @@
     </Appenders>
     <Loggers>
         <Root level="INFO">
-            <AppenderRef ref="Kafka"/>
+            <AppenderRef ref="Log"/>
             <AppenderRef ref="stdout"/>
         </Root>
         <Logger name="org.apache.kafka" level="WARN" />
