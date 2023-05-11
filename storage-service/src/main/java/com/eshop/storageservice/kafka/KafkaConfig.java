@@ -22,7 +22,10 @@ public class KafkaConfig {
 	private final KafkaProperties kafkaProperties;
 	
 	@Value("${product.topic.name}")
-	private String productTopic;
+	private String productTopicName;
+	
+	@Value("${log.topic.name}")
+	private String logTopicName;
 	
 	@Value("${partition.count}")
 	private Integer partitionCount;
@@ -42,8 +45,13 @@ public class KafkaConfig {
 	}
 	
 	@Bean
-	public NewTopic topic() {
-		return TopicBuilder.name(productTopic).partitions(partitionCount).replicas(replicaCount).build();
+	public NewTopic productTopic() {
+		return TopicBuilder.name(productTopicName).partitions(partitionCount).replicas(replicaCount).build();
+	}
+	
+	@Bean
+	public NewTopic logTopic() {
+		return TopicBuilder.name(logTopicName).partitions(partitionCount).replicas(replicaCount).build();
 	}
 	
 }

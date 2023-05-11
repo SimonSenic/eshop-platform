@@ -14,10 +14,10 @@ public class Producer {
 	private final KafkaTemplate<String, String> kafkaTemplate;
 	
 	@Value("${payment.topic.name}")
-	private String paymentTopic;
+	private String paymentTopicName;
 	
 	public void sendMessage(Long orderId){
-		kafkaTemplate.send(paymentTopic, orderId.toString());
+		kafkaTemplate.send(paymentTopicName, orderId.toString());
 	}
 
 }

@@ -8,13 +8,17 @@ import java.util.Optional;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.IpAddressMatcher;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -32,6 +36,7 @@ public class SecurityConfig {
         http.csrf().disable();
         http.authorizeHttpRequests().requestMatchers(GET, "/order-service/orders").hasAnyAuthority("ADMIN");
         http.authorizeHttpRequests().requestMatchers(GET, "/order-service/orders/my").hasAnyAuthority("CUSTOMER");
+        http.authorizeHttpRequests().requestMatchers(GET, "/order-service/orders/{id}").access(hasIpAddress("192.168.100.227"));
         http.authorizeHttpRequests().requestMatchers(GET, "/order-service/orders/{id}").hasAnyAuthority("ADMIN", "CUSTOMER");
         http.authorizeHttpRequests().requestMatchers(PATCH, "/order-service/orders/{id}/process").hasAnyAuthority("ADMIN");
         http.authorizeHttpRequests().requestMatchers("/order-service/orders/**").hasAnyAuthority("CUSTOMER");
@@ -66,6 +71,12 @@ public class SecurityConfig {
             	}
             }
         };
+    }
+	
+	@Bean
+	public AuthorizationManager<RequestAuthorizationContext> hasIpAddress(String address) {
+        IpAddressMatcher ipMatcher = new IpAddressMatcher(address);
+        return (authentication, context) -> new AuthorizationDecision(ipMatcher.matches(context.getRequest()));
     }
 	
 }

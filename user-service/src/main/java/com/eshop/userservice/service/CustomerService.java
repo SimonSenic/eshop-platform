@@ -1,13 +1,17 @@
 package com.eshop.userservice.service;
 
-import org.apache.logging.log4j.Level;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.eshop.userservice.dto.UserDTO;
 import com.eshop.userservice.entity.Role;
 import com.eshop.userservice.entity.User;
 import com.eshop.userservice.exception.BusinessException;
+import com.eshop.userservice.exception.NotFoundException;
 import com.eshop.userservice.mapper.UserMapper;
 import com.eshop.userservice.repository.UserRepository;
 
@@ -30,11 +34,29 @@ public class CustomerService {
 		}
 		
 		User user = new User(userDTO.getUsername(), passwordEncoder.encode(userDTO.getPassword()), userDTO.getEmail(), 
-				userDTO.getFirstName(), userDTO.getLastName(), userDTO.getAddress(), Role.CUSTOMER);
+				userDTO.getFirstName(), userDTO.getLastName(), userDTO.getAddress(), Role.CUSTOMER, false);
 		userRepository.save(user);
 		log.info("Customer registration successful (userId: {})", user.getId());
-		//log.info("Send confirm registration email (userId: {})", user.getId());
+		log.info("Send confirm registration email (userId: {})", user.getId());
 		return userMapper.toDTO(user);
+	}
+	
+	public void confirmRegistration(String verificationToken) {
+		if(verificationToken != null && !verificationToken.equals("")) {
+			try{
+                Algorithm algorithm = Algorithm.HMAC256("${secret.key}".getBytes());            
+                JWTVerifier verifier = JWT.require(algorithm).build();
+                DecodedJWT decodedJWT = verifier.verify(verificationToken);
+                
+                User user = userRepository.findByUsername(decodedJWT.getSubject())
+                		.orElseThrow(() -> new NotFoundException("User not found"));
+                user.setActive(true);
+                userRepository.save(user);
+                log.info("Customer registration confirmed (userId: {})", user.getId());
+            }catch (Exception e){
+                throw new BusinessException(e.getMessage());
+            }
+		}
 	}
 
 }

@@ -1,58 +1,78 @@
 package com.eshop.notificationservice.kafka;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import com.eshop.notificationservice.exception.BusinessException;
 import com.eshop.notificationservice.service.NotificationService;
 
+import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Component
 @AllArgsConstructor
-@Slf4j
 public class Consumer {
 	private final NotificationService notificationService;
 	
-	private final String logTopic = "${log.topic.name}";
-	private final String customerRegistrationTopic = "${customer-registration.topic.name}";
-	private final String adminCreationTopic = "${admin-creation.topic.name}";
-	private final String paymentConfirmationTopic = "${payment-confirmation.topic.name}";
-	private final String orderProcessingTopic = "${order-processing.topic.name}";
-	private final String orderCancellationTopic = "${order-cancellation.topic.name}";
+	private final String logTopicName = "${log.topic.name}";
+	private final String customerRegistrationTopicName = "${customer-registration.topic.name}";
+	private final String adminCreationTopicName = "${admin-creation.topic.name}";
+	private final String paymentConfirmationTopicName = "${payment-confirmation.topic.name}";
+	private final String orderProcessingTopicName = "${order-processing.topic.name}";
+	private final String orderCancellationTopicName = "${order-cancellation.topic.name}";
 	
-	@KafkaListener(topics = logTopic)
+	@KafkaListener(topics = logTopicName)
 	public void consumeLog(String message) {
-		log.info(message);
+		notificationService.log(message);
 	}
 	
-	@KafkaListener(topics = customerRegistrationTopic)
-	public void consumeCustomerRegistration(String message) {
-		notificationService.sendEmail("simon.senic@kosickaakademia.sk", "Customer email", "This is a test message");
-		log.info("Confirm registration email sent");
+	@KafkaListener(topics = { customerRegistrationTopicName, adminCreationTopicName })
+	public void consumeUserEmail(ConsumerRecord<String, String> record) throws MessagingException, BusinessException {
+		Pattern pattern = Pattern.compile("\\(userId: (\\d+)\\)");
+        Matcher matcher = pattern.matcher(record.value());
+        
+        if(matcher.find()) {
+        	Long userId = Long.valueOf(matcher.group(1));
+        	switch(record.topic()) {
+        		case customerRegistrationTopicName: {
+        			notificationService.sendConfirmRegistratonEmail(userId);
+        		}
+        		case adminCreationTopicName: {
+        			notificationService.sendCompleteRegistratonEmail(userId);
+        		}
+        	}	
+        	
+        }else {
+        	throw new BusinessException("Invalid userId");
+        }
 	}
 	
-	@KafkaListener(topics = adminCreationTopic)
-	public void consumeAdminCreation(String message) {
-		notificationService.sendEmail("simon.senic@kosickaakademia.sk", "Admin complete registration email", "This is a test message");
-		log.info("Complete registration email sent");
+	@KafkaListener(topics = { paymentConfirmationTopicName, orderProcessingTopicName, orderCancellationTopicName })
+	public void consumeOrderEmail(ConsumerRecord<String, String> record) throws MessagingException, BusinessException {
+		Pattern pattern = Pattern.compile("\\(userId: (\\d+)\\)");
+        Matcher matcher = pattern.matcher(record.value());
+        
+        if(matcher.find()) {
+        	Long orderId = Long.valueOf(matcher.group(1));
+        	switch(record.topic()) {
+        		case paymentConfirmationTopicName: {
+        			notificationService.sendPaymentConfirmationEmail(orderId);
+        		}
+        		case orderProcessingTopicName: {
+        			notificationService.sendOrderProcessingEmail(orderId);
+        		}
+        		case orderCancellationTopicName: {
+        			notificationService.sendOrderCancellationEmail(orderId);
+        		}
+        	}	
+        	
+        }else {
+        	throw new BusinessException("Invalid orderId");
+        }
 	}
 	
-	@KafkaListener(topics = paymentConfirmationTopic)
-	public void consumePaymentConfirmation(String message) {
-		notificationService.sendEmail("simon.senic@kosickaakademia.sk", "Order created!!", "This is a test message");
-		log.info("Payment confirmation email sent");
-	}
-	
-	@KafkaListener(topics = orderProcessingTopic)
-	public void consumeOrderProcessing(String message) {
-		notificationService.sendEmail("simon.senic@kosickaakademia.sk", "Order CONFIRMED!!!", "This is a test message");
-		log.info("Order processing email sent");
-	}
-	
-	@KafkaListener(topics = orderCancellationTopic)
-	public void consumeOrderCancellation(String message) {
-		notificationService.sendEmail("simon.senic@kosickaakademia.sk", "Order CANCELLED!!!", "This is a test message");
-		log.info("Order cancellation email sent");
-	}
 }

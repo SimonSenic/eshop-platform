@@ -36,7 +36,7 @@ public class UserController {
 		userService.refreshToken(request, response);
 	}
 	
-	@PatchMapping("/update") //update passwrd neprihlaseneho admina? cez token
+	@PatchMapping("/update")
 	public ResponseEntity<UserDTO> updateUser(@RequestBody @Valid UpdateUserDTO updateUserDTO){ 
 		return ResponseEntity.ok(userService.updateUser(updateUserDTO));
 	} 

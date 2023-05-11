@@ -3,8 +3,10 @@ package com.eshop.userservice.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.eshop.userservice.dto.UserDTO;
@@ -22,5 +24,10 @@ public class CustomerController {
 	@PostMapping("/register")
 	public ResponseEntity<UserDTO> registerCustomer(@RequestBody @Valid UserDTO userDTO) {
 		return ResponseEntity.status(HttpStatus.CREATED).body(customerService.registerCustomer(userDTO));
+	}
+	
+	@PutMapping("/confirm-registration")
+	public void confirmRegistration(@RequestParam String verificationToken) {
+		customerService.confirmRegistration(verificationToken);
 	}
 }

@@ -42,7 +42,7 @@ public class UserService implements UserDetailsService{
 	private final UserAuthentication userAuthentication;
 	
 	public UserDTO login(UserDTO userDTO) {
-		User user = userRepository.findByUsername(userDTO.getUsername())
+		User user = userRepository.findByUsername(userDTO.getUsername()).filter(temp -> temp.getActive())
 				.orElseThrow(() -> new NotFoundException("User not found"));
 		return userMapper.toDTO(user);
 	}

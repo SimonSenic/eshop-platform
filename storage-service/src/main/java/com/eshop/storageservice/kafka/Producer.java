@@ -21,13 +21,13 @@ public class Producer {
 	private final ObjectMapper objectMapper;
 	
 	@Value("${product.topic.name}")
-	private String productTopic;
+	private String productTopicName;
 	
 	public void sendMessage(ProductDTO product, Integer amount, String token) throws JsonProcessingException{
 		StringBuilder sb = new StringBuilder();
 		sb.append(objectMapper.writeValueAsString(product) +"\n");
 		sb.append(amount +"\n");
 		sb.append(token);
-		kafkaTemplate.send(productTopic, sb.toString());
+		kafkaTemplate.send(productTopicName, sb.toString());
 	}
 }

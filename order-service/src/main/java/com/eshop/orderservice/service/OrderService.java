@@ -64,8 +64,9 @@ public class OrderService {
 			Item item = itemRepository.findByOrderIdAndProductId(id, productId)
 					.orElseThrow(() -> new NotFoundException("Item not found"));
 			if(amount != null && amount != 0) {
+				ProductDTO product = apiClient.getProduct(productId).getBody();
 				item.setAmount(amount);
-				item.setPrice(apiClient.getProduct(productId).getBody().getPrice() * amount);
+				item.setPrice(product.getPrice() * amount);
 			}else {
 				order.getCart().remove(item);
 				itemRepository.delete(item);

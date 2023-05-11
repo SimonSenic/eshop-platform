@@ -45,4 +45,7 @@ public class User extends BaseEntity{
 	@NonNull
 	private Role role;
 	
+	@Column
+	private Boolean active;
+	
 }
