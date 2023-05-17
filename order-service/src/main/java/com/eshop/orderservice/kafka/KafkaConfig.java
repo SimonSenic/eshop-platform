@@ -1,4 +1,4 @@
-package com.eshop.orderservice.kafka;
+/*package com.eshop.orderservice.kafka;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,4 +49,4 @@ public class KafkaConfig {
 		return TopicBuilder.name(orderCancellationTopicName).partitions(partitionCount).replicas(replicaCount).build();
 	}
 	
-}
+}*/

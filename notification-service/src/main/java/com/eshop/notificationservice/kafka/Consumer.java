@@ -38,10 +38,11 @@ public class Consumer {
         if(matcher.find()) {
         	Long userId = Long.valueOf(matcher.group(1));
         	switch(record.topic()) {
-        		case customerRegistrationTopicName: {
+        		case "customer-registration": {
+        			System.out.println("NOO?");
         			notificationService.sendConfirmRegistratonEmail(userId);
         		}
-        		case adminCreationTopicName: {
+        		case "admin-creation": {
         			notificationService.sendCompleteRegistratonEmail(userId);
         		}
         	}	
@@ -59,13 +60,13 @@ public class Consumer {
         if(matcher.find()) {
         	Long orderId = Long.valueOf(matcher.group(1));
         	switch(record.topic()) {
-        		case paymentConfirmationTopicName: {
+        		case "payment-confirmation": {
         			notificationService.sendPaymentConfirmationEmail(orderId);
         		}
-        		case orderProcessingTopicName: {
+        		case "order-processing": {
         			notificationService.sendOrderProcessingEmail(orderId);
         		}
-        		case orderCancellationTopicName: {
+        		case "order-cancellation": {
         			notificationService.sendOrderCancellationEmail(orderId);
         		}
         	}	

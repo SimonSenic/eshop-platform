@@ -11,9 +11,7 @@ import com.eshop.notificationservice.dto.UserDTO;
 @FeignClient(name = "api-client", url = "http://localhost:9090")
 public interface ApiClient {
 	@GetMapping("/user-service/admin/get-user/{id}")
-	ResponseEntity<UserDTO> getUser(@PathVariable Long id); //nemam auth sessionu established???
-	//mozno specific Email send v log.info a poslat token do topicu???
-	//alebo novy endpoint s hasIpAddress appky pre ziskanie dat? userID a orderID mam
+	ResponseEntity<UserDTO> getUser(@PathVariable Long id);
 	
 	@GetMapping("/order-service/orders/{id}")
 	ResponseEntity<OrderDTO> getOrder(@PathVariable Long id);

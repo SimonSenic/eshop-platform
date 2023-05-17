@@ -37,14 +37,13 @@ public class CustomerService {
 				userDTO.getFirstName(), userDTO.getLastName(), userDTO.getAddress(), Role.CUSTOMER, false);
 		userRepository.save(user);
 		log.info("Customer registration successful (userId: {})", user.getId());
-		log.info("Send confirm registration email (userId: {})", user.getId());
 		return userMapper.toDTO(user);
 	}
 	
 	public void confirmRegistration(String verificationToken) {
 		if(verificationToken != null && !verificationToken.equals("")) {
 			try{
-                Algorithm algorithm = Algorithm.HMAC256("${secret.key}".getBytes());            
+                Algorithm algorithm = Algorithm.HMAC256("${verification.secret.key}".getBytes());            
                 JWTVerifier verifier = JWT.require(algorithm).build();
                 DecodedJWT decodedJWT = verifier.verify(verificationToken);
                 

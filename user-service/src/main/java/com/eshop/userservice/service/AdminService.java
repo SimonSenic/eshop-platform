@@ -42,7 +42,7 @@ public class AdminService {
 	public void completeRegistration(UpdateUserDTO updateUserDTO, String verificationToken) {
 		if(verificationToken != null && !verificationToken.equals("")) {
 			try{
-                Algorithm algorithm = Algorithm.HMAC256("${secret.key}".getBytes());
+                Algorithm algorithm = Algorithm.HMAC256("${verification.secret.key}".getBytes());
                 JWTVerifier verifier = JWT.require(algorithm).build();
                 DecodedJWT decodedJWT = verifier.verify(verificationToken);
                 

@@ -1,4 +1,4 @@
-package com.eshop.userservice.kafka;
+/*package com.eshop.userservice.kafka;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,4 +41,4 @@ public class KafkaConfig {
 		return TopicBuilder.name(adminCreationTopicName).partitions(partitionCount).replicas(replicaCount).build();
 	}
 	
-}
+}*/
