@@ -95,6 +95,7 @@ public class OrderService {
 		order.getCart().forEach(item -> apiClient.updateAvailability(item.getProductId(), item.getAmount()));
 		orderRepository.save(order);
 		log.info("Order cancelled successfully (orderId: {})", id);
+		log.info("Send order cancellation email (orderId: {})", id);
 		return orderMapper.toDTO(order);
 	}
 	
@@ -108,6 +109,11 @@ public class OrderService {
 		order.setState(state);
 		orderRepository.save(order);
 		log.info("Order state changed successfully (orderId: {})", id);
+		if(state.equals(State.CONFIRMED)) {
+			log.info("Send order processing email (orderId: {})", id);
+		}else if(state.equals(State.CANCELLED)) {
+			log.info("Send order cancellation email (orderId: {})", id);
+		}
 		return orderMapper.toDTO(order);
 	}
 	

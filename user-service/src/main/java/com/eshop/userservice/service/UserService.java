@@ -44,9 +44,8 @@ public class UserService implements UserDetailsService{
 	private final Environment environment;
 	
 	public UserDTO login(UserDTO userDTO) {
-		User user = userRepository.findByUsername(userDTO.getUsername()).filter(temp -> temp.getActive())
+		User user = userRepository.findByUsername(userDTO.getUsername())
 				.orElseThrow(() -> new NotFoundException("User not found"));
-		System.out.println("EHEHE");
 		return userMapper.toDTO(user);
 	}
 	
@@ -96,7 +95,7 @@ public class UserService implements UserDetailsService{
 	
 	@Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if(!userRepository.findByUsername(username).isPresent()) {
+        if(!userRepository.findByUsername(username).filter(temp -> temp.getActive()).isPresent()) {
            throw  new UsernameNotFoundException("User not found");
         }
         

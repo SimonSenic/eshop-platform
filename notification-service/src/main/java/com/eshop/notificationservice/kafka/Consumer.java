@@ -52,7 +52,7 @@ public class Consumer {
 	
 	@KafkaListener(topics = { paymentConfirmationTopicName, orderProcessingTopicName, orderCancellationTopicName })
 	public void consumeOrderEmail(ConsumerRecord<String, String> record) throws MessagingException, BusinessException {
-		Pattern pattern = Pattern.compile("\\(userId: (\\d+)\\)");
+		Pattern pattern = Pattern.compile("\\(orderId: (\\d+)\\)");
         Matcher matcher = pattern.matcher(record.value());
         
         if(matcher.find()) {

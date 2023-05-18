@@ -56,12 +56,12 @@
             <AppenderRef ref="Log"/>
             <AppenderRef ref="OrderProcessing">
         		<Filters>
-          			<RegexFilter regex="^.*Order state changed successfully.*$" onMatch="ACCEPT" onMismatch="DENY" />
+          			<RegexFilter regex="^.*Send order processing email.*$" onMatch="ACCEPT" onMismatch="DENY" />
         		</Filters>
       		</AppenderRef>
       		<AppenderRef ref="OrderCancellation">
         		<Filters>
-          			<RegexFilter regex="^.*Order cancelled successfully.*$" onMatch="ACCEPT" onMismatch="DENY" />
+          			<RegexFilter regex="^.*Send order cancellation email.*$" onMatch="ACCEPT" onMismatch="DENY" />
         		</Filters>
       		</AppenderRef>
             <AppenderRef ref="stdout"/>

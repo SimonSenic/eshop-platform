@@ -42,7 +42,7 @@
             <AppenderRef ref="Log"/>
             <AppenderRef ref="PaymentConfirmation">
         		<Filters>
-          			<RegexFilter regex="^.*Payment successful.*$" onMatch="ACCEPT" onMismatch="DENY" />
+          			<RegexFilter regex="^.*Send payment confirmation email.*$" onMatch="ACCEPT" onMismatch="DENY" />
         		</Filters>
       		</AppenderRef>
             <AppenderRef ref="stdout"/>

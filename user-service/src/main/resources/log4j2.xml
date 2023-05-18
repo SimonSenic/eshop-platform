@@ -56,12 +56,12 @@
             <AppenderRef ref="Log"/>
             <AppenderRef ref="CustomerRegistration">
         		<Filters>
-          			<RegexFilter regex="^.*Customer registration successful.*$" onMatch="ACCEPT" onMismatch="DENY" />
+          			<RegexFilter regex="^.*Send confirm registration email.*$" onMatch="ACCEPT" onMismatch="DENY" />
         		</Filters>
       		</AppenderRef>
       		<AppenderRef ref="AdminCreation">
         		<Filters>
-          			<RegexFilter regex="^.*Admin created successfully.*$" onMatch="ACCEPT" onMismatch="DENY" />
+          			<RegexFilter regex="^.*Send complete registration email.*$" onMatch="ACCEPT" onMismatch="DENY" />
         		</Filters>
       		</AppenderRef>
       		<AppenderRef ref="stdout"/>

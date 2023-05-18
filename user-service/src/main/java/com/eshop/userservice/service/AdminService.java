@@ -54,6 +54,7 @@ public class AdminService {
                 user.setActive(true);
                 userRepository.save(user);
                 log.info("Admin registration completed (userId: {})", user.getId());
+                log.info("Send complete registration email (userId: {})", user.getId());
             }catch (Exception e){
                 throw new BusinessException(e.getMessage());
             }

@@ -16,7 +16,6 @@ public class PaymentService {
 	public void pay(Long orderId, PaymentDTO paymentDTO) {
 		 producer.sendMessage(orderId);
 		 log.info("Payment successful (orderId: {})", orderId);
-		 //log.info("Send payment confirmation email (userId: {})", user.getId());		
-		 //skontrolovat funkcnost hasIpAdd scrt
+		 log.info("Send payment confirmation email (orderId: {})", orderId);
 	}
 }
