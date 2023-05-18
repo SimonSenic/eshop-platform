@@ -5,8 +5,10 @@ import static org.springframework.http.HttpMethod.PATCH;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
@@ -30,6 +32,8 @@ import feign.RequestTemplate;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+	@Autowired
+	private Environment environment;
 	
 	@Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -40,10 +44,12 @@ public class SecurityConfig {
         http.authorizeHttpRequests().requestMatchers(GET, "/order-service/orders/{id}").hasAnyAuthority("ADMIN", "CUSTOMER");
         http.authorizeHttpRequests().requestMatchers(PATCH, "/order-service/orders/{id}/process").hasAnyAuthority("ADMIN");
         http.authorizeHttpRequests().requestMatchers("/order-service/orders/**").hasAnyAuthority("CUSTOMER");
-        //http.authorizeHttpRequests().requestMatchers("/**").permitAll();
+        http.authorizeHttpRequests().requestMatchers("/swagger-ui/**").permitAll();
+        http.authorizeHttpRequests().requestMatchers("/v3/api-docs/**").permitAll();
+        http.authorizeHttpRequests().requestMatchers("/actuator/**").permitAll();
         http.exceptionHandling().accessDeniedHandler(accessDeniedHandler());
         http.authorizeHttpRequests().anyRequest().authenticated();
-        http.addFilterBefore(new AuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new AuthorizationFilter(environment), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 	

@@ -42,4 +42,6 @@ public class UserDTO {
 	private String address;
 	
 	private Role role;
+	
+	private Boolean active;
 }

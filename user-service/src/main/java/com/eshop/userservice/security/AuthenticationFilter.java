@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.json.JSONObject;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,10 +27,12 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 	private AuthenticationManager authenticationManager;
+	private Environment environment;
 
-	public AuthenticationFilter(AuthenticationManager authenticationManager) {
+	public AuthenticationFilter(AuthenticationManager authenticationManager, Environment environment) {
 		super("/user-service/user/login");
 	    this.authenticationManager = authenticationManager;
+	    this.environment = environment;
 	}
 
 	@Override
@@ -52,7 +55,7 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
 	        FilterChain chain, Authentication authResult) throws IOException, ServletException {
 	    User user = (User) authResult.getPrincipal();
-	    Algorithm algorithm = Algorithm.HMAC256("${secret.key}".getBytes());
+	    Algorithm algorithm = Algorithm.HMAC256(environment.getProperty("secret.key").getBytes());
 	    String access_token = JWT.create()
 	    		.withSubject(user.getUsername())
 	    		.withExpiresAt(new Date(System.currentTimeMillis() + 20 * 60 * 1000))

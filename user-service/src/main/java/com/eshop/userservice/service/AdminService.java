@@ -1,5 +1,6 @@
 package com.eshop.userservice.service;
 
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.auth0.jwt.JWT;
@@ -24,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AdminService {
 	private final UserRepository userRepository;
 	private final UserMapper userMapper;
+	private final Environment environment;
 	
 	public UserDTO createAdmin(UserDTO userDTO) {
 		if (userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
@@ -42,7 +44,7 @@ public class AdminService {
 	public void completeRegistration(UpdateUserDTO updateUserDTO, String verificationToken) {
 		if(verificationToken != null && !verificationToken.equals("")) {
 			try{
-                Algorithm algorithm = Algorithm.HMAC256("${verification.secret.key}".getBytes());
+                Algorithm algorithm = Algorithm.HMAC256(environment.getProperty("verification.secret.key").getBytes());
                 JWTVerifier verifier = JWT.require(algorithm).build();
                 DecodedJWT decodedJWT = verifier.verify(verificationToken);
                 

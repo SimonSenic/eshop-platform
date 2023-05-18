@@ -4,6 +4,8 @@
         <Kafka name="Log" topic="log">
             <PatternLayout pattern="%date %message"/>
             <Property name="bootstrap.servers">localhost:9092</Property>
+            <Property name="num.partitions">5</Property>
+    		<Property name="replication.factor">3</Property>
             <Property name="security.protocol">SSL</Property>
             <Property name="ssl.endpoint.identification.algorithm"></Property>
             <Property name="ssl.keystore.location">../configuration-service/ssl/keystore.jks</Property>

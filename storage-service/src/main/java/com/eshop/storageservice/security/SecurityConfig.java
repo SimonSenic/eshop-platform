@@ -6,8 +6,10 @@ import static org.springframework.http.HttpMethod.PUT;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
@@ -26,6 +28,8 @@ import com.eshop.storageservice.exception.AccessDeniedExceptionHandler;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+	@Autowired
+	private Environment environment;
 	
 	@Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -34,10 +38,12 @@ public class SecurityConfig {
         http.authorizeHttpRequests().requestMatchers(POST, "/storage-service/products/{id}/order").hasAnyAuthority("CUSTOMER");
         http.authorizeHttpRequests().requestMatchers(PUT, "/storage-service/products/{id}/update-availability").access(hasIpAddress("192.168.100.227"));
         http.authorizeHttpRequests().requestMatchers("/storage-service/products/**").hasAnyAuthority("ADMIN");
-        //http.authorizeHttpRequests().requestMatchers("/**").permitAll();
+        http.authorizeHttpRequests().requestMatchers("/swagger-ui/**").permitAll();
+        http.authorizeHttpRequests().requestMatchers("/v3/api-docs/**").permitAll();
+        http.authorizeHttpRequests().requestMatchers("/actuator/**").permitAll();
         http.exceptionHandling().accessDeniedHandler(accessDeniedHandler());
         http.authorizeHttpRequests().anyRequest().authenticated();
-        http.addFilterBefore(new AuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new AuthorizationFilter(environment), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 	

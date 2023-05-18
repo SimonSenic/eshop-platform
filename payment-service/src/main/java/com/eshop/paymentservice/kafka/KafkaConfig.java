@@ -24,9 +24,6 @@ public class KafkaConfig {
 	@Value("${payment.topic.name}")
 	private String paymentTopicName;
 	
-	@Value("${log.topic.name}")
-	private String logTopicName;
-	
 	@Value("${partition.count}")
 	private Integer partitionCount;
 	
@@ -47,11 +44,6 @@ public class KafkaConfig {
 	@Bean
 	public NewTopic paymentTopic() {
 		return TopicBuilder.name(paymentTopicName).partitions(partitionCount).replicas(replicaCount).build();
-	}
-	
-	@Bean
-	public NewTopic logTopic() {
-		return TopicBuilder.name(logTopicName).partitions(partitionCount).replicas(replicaCount).build();
 	}
 
 }

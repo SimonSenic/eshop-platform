@@ -1,5 +1,6 @@
 package com.eshop.userservice.service;
 
+import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ public class CustomerService {
 	private final UserRepository userRepository;
 	private final UserMapper userMapper;
 	private final PasswordEncoder passwordEncoder;
+	private final Environment environment;
 	
 	public UserDTO registerCustomer(UserDTO userDTO) {
 		if (userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
@@ -37,13 +39,14 @@ public class CustomerService {
 				userDTO.getFirstName(), userDTO.getLastName(), userDTO.getAddress(), Role.CUSTOMER, false);
 		userRepository.save(user);
 		log.info("Customer registration successful (userId: {})", user.getId());
+		log.info("Send confirm registration email (userId: {})", user.getId());
 		return userMapper.toDTO(user);
 	}
 	
 	public void confirmRegistration(String verificationToken) {
 		if(verificationToken != null && !verificationToken.equals("")) {
 			try{
-                Algorithm algorithm = Algorithm.HMAC256("${verification.secret.key}".getBytes());            
+                Algorithm algorithm = Algorithm.HMAC256(environment.getProperty("verification.secret.key").getBytes());            
                 JWTVerifier verifier = JWT.require(algorithm).build();
                 DecodedJWT decodedJWT = verifier.verify(verificationToken);
                 

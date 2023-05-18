@@ -7,7 +7,7 @@ networks:
 
 services:
   zookeeper:
-    image: zookeeper
+    image: wurstmeister/zookeeper
     container_name: zookeeper
     restart: "no"
     networks:

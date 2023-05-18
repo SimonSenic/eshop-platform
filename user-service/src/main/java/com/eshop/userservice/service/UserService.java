@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.env.Environment;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,10 +41,12 @@ public class UserService implements UserDetailsService{
 	private final UserMapper userMapper;
 	private final PasswordEncoder passwordEncoder;
 	private final UserAuthentication userAuthentication;
+	private final Environment environment;
 	
 	public UserDTO login(UserDTO userDTO) {
 		User user = userRepository.findByUsername(userDTO.getUsername()).filter(temp -> temp.getActive())
 				.orElseThrow(() -> new NotFoundException("User not found"));
+		System.out.println("EHEHE");
 		return userMapper.toDTO(user);
 	}
 	
@@ -53,7 +56,7 @@ public class UserService implements UserDetailsService{
 		if(auth.isAuthenticated()) {
 			User user = userRepository.findByUsername(auth.getName())
 					.orElseThrow(() -> new NotFoundException("User not found"));
-			Algorithm algorithm = Algorithm.HMAC256("${secret.key}".getBytes());
+			Algorithm algorithm = Algorithm.HMAC256(environment.getProperty("secret.key").getBytes());
 		    String access_token = JWT.create()
 		    		.withSubject(user.getUsername())
 		    		.withExpiresAt(new Date(System.currentTimeMillis() + 15 * 60 * 1000))

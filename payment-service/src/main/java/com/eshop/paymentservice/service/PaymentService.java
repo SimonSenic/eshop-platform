@@ -16,8 +16,7 @@ public class PaymentService {
 	public void pay(Long orderId, PaymentDTO paymentDTO) {
 		 producer.sendMessage(orderId);
 		 log.info("Payment successful (orderId: {})", orderId);
-		 //log.info("Send payment confirmation email (userId: {})", user.getId());
-		 //posledne 2 veci, toto a preco consumer nemusi cez @Value + secretkey
-		 //skontrolovat funkcnost hasIpAdd scrt, actuator + swgr endpointy v scrt cfg
+		 //log.info("Send payment confirmation email (userId: {})", user.getId());		
+		 //skontrolovat funkcnost hasIpAdd scrt
 	}
 }

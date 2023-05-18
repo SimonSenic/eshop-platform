@@ -2,6 +2,7 @@ package com.eshop.notificationservice.service;
 
 import java.util.Date;
 
+import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class NotificationService {
 	private final JavaMailSender mailSender;
 	private final TemplateEngine templateEngine;
 	private final ApiClient apiClient;
+	private final Environment environment;
 	
 	public void log(String message) {
 		log.info(message);
@@ -108,7 +110,7 @@ public class NotificationService {
 	}
 	
 	private String generateVerificationToken(UserDTO user) {
-		Algorithm algorithm = Algorithm.HMAC256("${verification.secret.key}".getBytes());
+		Algorithm algorithm = Algorithm.HMAC256(environment.getProperty("verification.secret.key").getBytes());
 	    String verificationToken = JWT.create()
 	    		.withSubject(user.getUsername())
 	    		.withExpiresAt(new Date(System.currentTimeMillis() + 168 * 60 * 60 * 1000))

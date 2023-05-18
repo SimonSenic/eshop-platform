@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.core.env.Environment;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class Consumer {
 	private final NotificationService notificationService;
+	private final Environment environment;
 	
 	private final String logTopicName = "${log.topic.name}";
 	private final String customerRegistrationTopicName = "${customer-registration.topic.name}";
@@ -37,15 +39,11 @@ public class Consumer {
         
         if(matcher.find()) {
         	Long userId = Long.valueOf(matcher.group(1));
-        	switch(record.topic()) {
-        		case "customer-registration": {
-        			System.out.println("NOO?");
-        			notificationService.sendConfirmRegistratonEmail(userId);
-        		}
-        		case "admin-creation": {
-        			notificationService.sendCompleteRegistratonEmail(userId);
-        		}
-        	}	
+        	if(record.topic().equals(environment.getProperty("customer-registration.topic.name"))) {
+        		notificationService.sendConfirmRegistratonEmail(userId);
+        	}else if(record.topic().equals(environment.getProperty("admin-creation.topic.name"))) {
+        		notificationService.sendCompleteRegistratonEmail(userId);
+        	}
         	
         }else {
         	throw new BusinessException("Invalid userId");
@@ -59,17 +57,13 @@ public class Consumer {
         
         if(matcher.find()) {
         	Long orderId = Long.valueOf(matcher.group(1));
-        	switch(record.topic()) {
-        		case "payment-confirmation": {
-        			notificationService.sendPaymentConfirmationEmail(orderId);
-        		}
-        		case "order-processing": {
-        			notificationService.sendOrderProcessingEmail(orderId);
-        		}
-        		case "order-cancellation": {
-        			notificationService.sendOrderCancellationEmail(orderId);
-        		}
-        	}	
+        	if(record.topic().equals(environment.getProperty("payment-confirmation.topic.name"))) {
+        		notificationService.sendPaymentConfirmationEmail(orderId);
+        	}else if(record.topic().equals(environment.getProperty("order-processing.topic.name"))) {
+        		notificationService.sendOrderProcessingEmail(orderId);
+        	}else if(record.topic().equals(environment.getProperty("order-cancellation.topic.name"))){
+        		notificationService.sendOrderCancellationEmail(orderId);
+        	}
         	
         }else {
         	throw new BusinessException("Invalid orderId");
