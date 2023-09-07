@@ -39,11 +39,25 @@
             <Property name="ssl.truststore.location">../configuration-service/ssl/truststore.jks</Property>
             <Property name="ssl.truststore.password">password</Property>
 		</Kafka>
+		
+		<Kafka name="PasswordRecovery" topic="password-recovery">
+			<PatternLayout pattern="%date %message"/>
+			<Property name="bootstrap.servers">localhost:9092</Property>
+			<Property name="num.partitions">5</Property>
+    		<Property name="replication.factor">3</Property>
+            <Property name="security.protocol">SSL</Property>
+            <Property name="ssl.endpoint.identification.algorithm"></Property>
+            <Property name="ssl.keystore.location">../configuration-service/ssl/keystore.jks</Property>
+            <Property name="ssl.keystore.password">password</Property>
+            <Property name="ssl.truststore.location">../configuration-service/ssl/truststore.jks</Property>
+            <Property name="ssl.truststore.password">password</Property>
+		</Kafka>
         
         <Async name="Async">
             <AppenderRef ref="Log"/>
             <AppenderRef ref="CustomerRegistration"/>
             <AppenderRef ref="AdminCreation"/>
+            <AppenderRef ref="PasswordRecovery"/>
         </Async>
 
         <Console name="stdout" target="SYSTEM_OUT">
@@ -62,6 +76,11 @@
       		<AppenderRef ref="AdminCreation">
         		<Filters>
           			<RegexFilter regex="^.*Send complete registration email.*$" onMatch="ACCEPT" onMismatch="DENY" />
+        		</Filters>
+      		</AppenderRef>
+      		<AppenderRef ref="PasswordRecovery">
+        		<Filters>
+          			<RegexFilter regex="^.*Send password recovery email.*$" onMatch="ACCEPT" onMismatch="DENY" />
         		</Filters>
       		</AppenderRef>
       		<AppenderRef ref="stdout"/>

@@ -39,7 +39,17 @@ public class UserController {
 	@PatchMapping("/update")
 	public ResponseEntity<UserDTO> updateUser(@RequestBody @Valid UpdateUserDTO updateUserDTO){ 
 		return ResponseEntity.ok(userService.updateUser(updateUserDTO));
-	} 
+	}
+	
+	@PostMapping("/recover-password")
+	public void recoverPassword(){
+		userService.recoverPassword();
+	}
+	
+	@PatchMapping("/set-new-password")
+	public void setNewPassword(@RequestBody @Valid UpdateUserDTO updateUserDTO, String verificationToken){ 
+		userService.setNewPassword(updateUserDTO, verificationToken);
+	}
 	
 	@GetMapping("/profile")
 	public ResponseEntity<UserDTO> getUserProfile(){

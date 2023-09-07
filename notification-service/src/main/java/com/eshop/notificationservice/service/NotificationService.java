@@ -12,8 +12,11 @@ import org.thymeleaf.context.Context;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.eshop.notificationservice.dto.OrderDTO;
+import com.eshop.notificationservice.dto.Role;
 import com.eshop.notificationservice.dto.UserDTO;
+import com.eshop.notificationservice.exception.BusinessException;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
@@ -32,6 +35,7 @@ public class NotificationService {
 		log.info(message);
 	}
 	
+	@Retry(fallbackMethod = "servicesDownFallback", name = "")
 	public void sendConfirmRegistratonEmail(Long userId) throws MessagingException {
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -47,6 +51,7 @@ public class NotificationService {
 		mailSender.send(message);
 	}
 	
+	@Retry(fallbackMethod = "servicesDownFallback", name = "")
 	public void sendCompleteRegistratonEmail(Long userId) throws MessagingException {
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -61,6 +66,23 @@ public class NotificationService {
 		mailSender.send(message);
 	}
 	
+	@Retry(fallbackMethod = "servicesDownFallback", name = "")
+	public void sendPasswordRecoveryEmail(Long userId) throws MessagingException {
+		MimeMessage message = mailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(message, true);
+		UserDTO user = apiClient.getUser(userId).getBody();
+		
+		helper.setTo(user.getEmail());
+		helper.setSubject("Eshop Platform - Recover password");
+		Context context = new Context();
+		context.setVariable("username", user.getUsername());
+        context.setVariable("link", "http://localhost:9090/user-service/user/set-new-password?verificationToken=" +generateVerificationToken(user));
+        String body = templateEngine.process("password-recovery-template", context);
+		helper.setText(body, true);
+		mailSender.send(message);
+	}
+	
+	@Retry(fallbackMethod = "servicesDownFallback", name = "")
 	public void sendPaymentConfirmationEmail(Long orderId) throws MessagingException {
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -77,6 +99,7 @@ public class NotificationService {
 		mailSender.send(message);
 	}
 	
+	@Retry(fallbackMethod = "servicesDownFallback", name = "")
 	public void sendOrderProcessingEmail(Long orderId) throws MessagingException {
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -93,6 +116,7 @@ public class NotificationService {
 		mailSender.send(message);
 	}
 	
+	@Retry(fallbackMethod = "servicesDownFallback", name = "")
 	public void sendOrderCancellationEmail(Long orderId) throws MessagingException {
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -109,10 +133,18 @@ public class NotificationService {
 		mailSender.send(message);
 	}
 	
+	private void servicesDownFallback(Exception e) {
+        throw new BusinessException("Services are down");
+    }
+	
 	private String generateVerificationToken(UserDTO user) {
 		Algorithm algorithm = Algorithm.HMAC256(environment.getProperty("verification.secret.key").getBytes());
+		String subject = user.getUsername();
+		if(user.getRole().equals(Role.ADMIN) && !user.getActive()) {
+			subject = user.getEmail();
+		}
 	    String verificationToken = JWT.create()
-	    		.withSubject(user.getUsername())
+	    		.withSubject(subject)
 	    		.withExpiresAt(new Date(System.currentTimeMillis() + 168 * 60 * 60 * 1000))
 	            .sign(algorithm);
 	    return verificationToken;

@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.eshop.userservice.dto.UpdateUserDTO;
+import com.eshop.userservice.dto.CreateAdminDTO;
+import com.eshop.userservice.dto.UpdateAdminDTO;
 import com.eshop.userservice.dto.UserDTO;
 import com.eshop.userservice.service.AdminService;
 
@@ -25,13 +26,13 @@ public class AdminController {
 	private final AdminService adminService;
 	
 	@PostMapping("/create-admin")
-	public ResponseEntity<UserDTO> createAdmin(@RequestBody @Valid UserDTO userDTO) {
-		return ResponseEntity.status(HttpStatus.CREATED).body(adminService.createAdmin(userDTO));
+	public ResponseEntity<UserDTO> createAdmin(@RequestBody @Valid CreateAdminDTO createAdminDTO) {
+		return ResponseEntity.status(HttpStatus.CREATED).body(adminService.createAdmin(createAdminDTO));
 	}
 	
 	@PutMapping("/complete-registration")
-	public ResponseEntity<UserDTO> completeRegistration(@RequestBody @Valid UpdateUserDTO updateUserDTO, @RequestParam String verificationToken){ 
-		return ResponseEntity.ok(adminService.createAdmin(null));
+	public void completeRegistration(@RequestBody @Valid UpdateAdminDTO updateAdminDTO, @RequestParam String verificationToken){ 
+		adminService.completeRegistration(updateAdminDTO, verificationToken);
 	} 
 	
 	@GetMapping("/get-user/{id}")

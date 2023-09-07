@@ -2,6 +2,7 @@ package com.eshop.userservice.security;
 
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.PUT;
 
 import java.util.Optional;
 
@@ -39,8 +40,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.authorizeHttpRequests().requestMatchers("/user-service/customer/**").permitAll();
+        http.authorizeHttpRequests().requestMatchers(POST, "/user-service/admin/create-admin").hasAnyAuthority("ADMIN");
+        http.authorizeHttpRequests().requestMatchers(PUT, "/user-service/admin/complete-registration").permitAll();
         http.authorizeHttpRequests().requestMatchers(GET, "/user-service/admin/get-user/{id}").access(hasIpAddress("192.168.100.227"));
-        http.authorizeHttpRequests().requestMatchers("/user-service/admin/**").hasAnyAuthority("ADMIN");
         http.authorizeHttpRequests().requestMatchers(POST, "/user-service/user/login").permitAll();
         http.authorizeHttpRequests().requestMatchers("/user-service/user/**").hasAnyAuthority("ADMIN", "CUSTOMER");
         http.authorizeHttpRequests().requestMatchers("/swagger-ui/**").permitAll();

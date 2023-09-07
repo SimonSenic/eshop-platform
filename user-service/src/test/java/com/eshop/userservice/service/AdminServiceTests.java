@@ -67,9 +67,9 @@ public class AdminServiceTests {
 		assertThat(result).isNotNull()
 		.extracting(UserDTO::getId, UserDTO::getUsername, UserDTO::getEmail)
 		.containsExactly(1L, USERNAME, EMAIL);
-	}*/
+	}
 	
-	//@Test
+	@Test
 	void testSuccessfullyCreateAdmin() {
 		UserDTO userDTO = UserDTO.builder()
 				.id(1L)
@@ -84,6 +84,6 @@ public class AdminServiceTests {
 		assertThat(result).isNotNull()
 		.extracting(UserDTO::getId, UserDTO::getUsername, UserDTO::getRole)
 		.containsExactly(1L, USERNAME, Role.ADMIN);
-	}
+	}*/
 
 }

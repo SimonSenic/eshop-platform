@@ -7,7 +7,8 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.eshop.userservice.dto.UpdateUserDTO;
+import com.eshop.userservice.dto.CreateAdminDTO;
+import com.eshop.userservice.dto.UpdateAdminDTO;
 import com.eshop.userservice.dto.UserDTO;
 import com.eshop.userservice.entity.Role;
 import com.eshop.userservice.entity.User;
@@ -27,30 +28,32 @@ public class AdminService {
 	private final UserMapper userMapper;
 	private final Environment environment;
 	
-	public UserDTO createAdmin(UserDTO userDTO) {
-		if (userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
-			throw new BusinessException("Username is already occupied");
-		}else if(userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
+	public UserDTO createAdmin(CreateAdminDTO createAdminDTO) {
+		if(userRepository.findByEmail(createAdminDTO.getEmail()).isPresent()) {
 			throw new BusinessException("Email is already occupied");
 		}
 		
-		User user = new User(userDTO.getUsername(), userDTO.getEmail(), Role.ADMIN);
+		User user = new User(createAdminDTO.getEmail(), Role.ADMIN, false);
 		userRepository.save(user);
 		log.info("Admin created successfully (userId: {})", user.getId());
 		log.info("Send complete registration email (userId: {})", user.getId());
 		return userMapper.toDTO(user);
 	}
 	
-	public void completeRegistration(UpdateUserDTO updateUserDTO, String verificationToken) {
+	public void completeRegistration(UpdateAdminDTO updateAdminDTO, String verificationToken) {
 		if(verificationToken != null && !verificationToken.equals("")) {
 			try{
                 Algorithm algorithm = Algorithm.HMAC256(environment.getProperty("verification.secret.key").getBytes());
                 JWTVerifier verifier = JWT.require(algorithm).build();
                 DecodedJWT decodedJWT = verifier.verify(verificationToken);
                 
-                User user = userRepository.findByUsername(decodedJWT.getSubject())
+                User user = userRepository.findByEmail(decodedJWT.getSubject())
                 		.orElseThrow(() -> new NotFoundException("User not found"));
-                userMapper.updateUser(user, updateUserDTO);
+                if(userRepository.findByUsername(updateAdminDTO.getUsername()).isPresent()){
+        			throw new BusinessException("Username is already occupied");
+        		}
+                
+                user = userMapper.updateAdmin(user, updateAdminDTO);
                 user.setActive(true);
                 userRepository.save(user);
                 log.info("Admin registration completed (userId: {})", user.getId());

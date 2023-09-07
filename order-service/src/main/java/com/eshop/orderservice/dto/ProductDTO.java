@@ -1,5 +1,7 @@
 package com.eshop.orderservice.dto;
 
+import java.math.BigDecimal;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,7 +12,7 @@ public class ProductDTO {
 	
 	private String name;
 	
-	private Double price;
+	private BigDecimal price;
 	
 	private int availability;
 }

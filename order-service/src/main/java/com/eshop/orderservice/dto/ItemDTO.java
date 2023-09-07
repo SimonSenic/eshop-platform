@@ -1,5 +1,7 @@
 package com.eshop.orderservice.dto;
 
+import java.math.BigDecimal;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,5 +14,5 @@ public class ItemDTO {
 	
 	private Integer amount;
 	
-	private Double price;
+	private BigDecimal price;
 }

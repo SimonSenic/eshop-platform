@@ -18,7 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.eshop.userservice.dto.UpdateUserDTO;
 import com.eshop.userservice.dto.UserDTO;
 import com.eshop.userservice.entity.User;
@@ -81,10 +83,40 @@ public class UserService implements UserDetailsService{
 			throw new BusinessException("New password must not be the same");
 		}
 		
+		if(userRepository.findByUsername(updateUserDTO.getUsername()).isPresent()){
+			throw new BusinessException("Username is already occupied");
+		}else if(userRepository.findByEmail(updateUserDTO.getEmail()).isPresent()){
+			throw new BusinessException("Email is already occupied");
+		}
+		
 		user = userMapper.updateUser(user, updateUserDTO);
 		userRepository.save(user);
 		log.info("User updated successfully (userId: {})", user.getId());
 		return userMapper.toDTO(user);
+	}
+	
+	public void recoverPassword() {
+		User user = userRepository.findByUsername(userAuthentication.getAuthentication().getName())
+				.orElseThrow(() -> new NotFoundException("User not found"));
+		log.info("Send password recovery email (userId: {})", user.getId());
+	}
+	
+	public void setNewPassword(UpdateUserDTO updateUserDTO, String verificationToken) {
+		if(verificationToken != null && !verificationToken.equals("")) {
+			try {
+				Algorithm algorithm = Algorithm.HMAC256(environment.getProperty("verification.secret.key").getBytes());
+                JWTVerifier verifier = JWT.require(algorithm).build();
+                DecodedJWT decodedJWT = verifier.verify(verificationToken);
+                
+                User user = userRepository.findByUsername(decodedJWT.getSubject())
+                		.orElseThrow(() -> new NotFoundException("User not found"));
+				user.setPassword(passwordEncoder.encode(updateUserDTO.getPassword()));
+				userRepository.save(user);
+				log.info("User password recovered successfully (userId: {})", user.getId());
+			}catch (Exception e){
+                throw new BusinessException(e.getMessage());
+            }
+		}
 	}
 	
 	public UserDTO getUserProfile() {

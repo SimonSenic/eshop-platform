@@ -1,5 +1,6 @@
 package com.eshop.orderservice.entity;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -34,7 +35,7 @@ public class Order extends BaseEntity {
 	private List<Item> cart;
 	
 	@Column
-	private Double totalPrice;
+	private BigDecimal totalPrice;
 	
 	@Enumerated(EnumType.STRING)
 	@Column

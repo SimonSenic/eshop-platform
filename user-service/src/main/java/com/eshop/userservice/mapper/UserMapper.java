@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
+import com.eshop.userservice.dto.UpdateAdminDTO;
 import com.eshop.userservice.dto.UpdateUserDTO;
 import com.eshop.userservice.dto.UserDTO;
 import com.eshop.userservice.entity.User;
@@ -16,4 +17,7 @@ public interface UserMapper {
 	
 	@Mapping(target = "password", source = "newPassword", qualifiedBy = EncodedMapping.class)
 	User updateUser(@MappingTarget User user, UpdateUserDTO updateUserDTO);
+	
+	@Mapping(target = "password", qualifiedBy = EncodedMapping.class)
+	User updateAdmin(@MappingTarget User user, UpdateAdminDTO updateAdminDTO);
 }

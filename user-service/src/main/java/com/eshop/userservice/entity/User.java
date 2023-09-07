@@ -21,7 +21,6 @@ import lombok.Setter;
 @Setter
 public class User extends BaseEntity{
 	@Column
-	@NonNull
 	private String username;
 	
 	@Column
@@ -46,6 +45,7 @@ public class User extends BaseEntity{
 	private Role role;
 	
 	@Column
+	@NonNull
 	private Boolean active;
 	
 }

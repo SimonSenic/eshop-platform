@@ -1,5 +1,6 @@
 package com.eshop.orderservice.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +26,7 @@ import com.eshop.orderservice.mapper.OrderMapper;
 import com.eshop.orderservice.repository.ItemRepository;
 import com.eshop.orderservice.repository.OrderRepository;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,7 +50,8 @@ public class OrderService {
 	}
 	
 	public List<OrderDTO> getMyOrders(){
-		List<Order> orders = orderRepository.findByUserId(apiClient.getUserProfile().getBody().getId());
+		UserDTO user = apiClient.getUserProfile().getBody();
+		List<Order> orders = orderRepository.findByUserId(user.getId());
 		return orderMapper.toDTOs(orders);
 	}
 	
@@ -66,16 +69,16 @@ public class OrderService {
 			if(amount != null && amount != 0) {
 				ProductDTO product = apiClient.getProduct(productId).getBody();
 				item.setAmount(amount);
-				item.setPrice(product.getPrice() * amount);
+				item.setPrice(product.getPrice().multiply(BigDecimal.valueOf(amount)));
 			}else {
 				order.getCart().remove(item);
 				itemRepository.delete(item);
 			}
-			order.setTotalPrice(0.0);
-			order.getCart().forEach(temp -> order.setTotalPrice(order.getTotalPrice() + temp.getPrice()));
+			order.setTotalPrice(BigDecimal.valueOf(0));
+			order.getCart().forEach(temp -> order.setTotalPrice(order.getTotalPrice().add(temp.getPrice())));
 		}else {
 			itemRepository.deleteAllByOrderId(id);
-			order.setTotalPrice(0.0);
+			order.setTotalPrice(BigDecimal.valueOf(0));
 		}
 		
 		orderRepository.save(order);
@@ -118,6 +121,7 @@ public class OrderService {
 	}
 	
 	@Transactional
+	@Retry(fallbackMethod = "userServiceDownFallback", name = "")
 	public void createOrder(ProductDTO product, Integer amount, String token) {
 		UserDTO user = apiClient.getUserProfile(token).getBody();
 		List<SimpleGrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority(user.getRole().name()));
@@ -131,19 +135,20 @@ public class OrderService {
 		
 		if(order.getCart().contains(item)) {
 			item.setAmount(item.getAmount() + amount);
-			item.setPrice(item.getPrice() + product.getPrice() * amount);
+			item.setPrice(item.getPrice().add(product.getPrice().multiply(BigDecimal.valueOf(amount))));
 		}else {
 			item.setAmount(amount);
-			item.setPrice(product.getPrice() * amount);
+			item.setPrice(product.getPrice().multiply(BigDecimal.valueOf(amount)));
 			order.getCart().add(item);
 		}
-		order.setTotalPrice(0.0);
-		order.getCart().forEach(temp -> order.setTotalPrice(order.getTotalPrice() + temp.getPrice()));
+		order.setTotalPrice(BigDecimal.valueOf(0));
+		order.getCart().forEach(temp -> order.setTotalPrice(order.getTotalPrice().add(temp.getPrice())));
 		orderRepository.save(order);
 		log.info("Product added to cart successfully (productId: {})", product.getId());
 	}
 	
 	@Transactional
+	@Retry(fallbackMethod = "storageServiceDownFallback", name = "")
 	public void completePayment(Long orderId) {
 		Order order = orderRepository.findById(orderId)
 				.orElseThrow(() -> new NotFoundException("Order not found"));
@@ -155,4 +160,21 @@ public class OrderService {
 		order.getCart().forEach(item -> apiClient.updateAvailability(item.getProductId(), -item.getAmount()));
 		orderRepository.save(order);
 	}
+	
+	private void userServiceDownFallback(Exception exception) throws Exception {
+		if(!(exception instanceof BusinessException)) {
+			throw new BusinessException("User service is down");
+		}else {
+			throw exception;
+		}
+    }
+	
+	private void storageServiceDownFallback(Exception exception) throws Exception {
+		if(!(exception instanceof BusinessException) && !(exception instanceof NotFoundException)) {
+			throw new BusinessException("Storage service is down");
+		}else {
+			throw exception;
+		}
+    }
+	
 }

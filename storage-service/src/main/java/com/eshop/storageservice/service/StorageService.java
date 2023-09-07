@@ -1,5 +1,7 @@
 package com.eshop.storageservice.service;
 
+import java.math.RoundingMode;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -40,7 +42,7 @@ public class StorageService {
 			throw new BusinessException("Product already exists");
 		}
 		
-		Product product = new Product(productDTO.getName(), productDTO.getPrice(), productDTO.getAvailability());
+		Product product = new Product(productDTO.getName(), productDTO.getPrice().setScale(2, RoundingMode.HALF_UP), productDTO.getAvailability());
 		storageRepository.save(product);
 		log.info("Product added successfully (productId: {})", product.getId());
 		return productMapper.toDTO(product);

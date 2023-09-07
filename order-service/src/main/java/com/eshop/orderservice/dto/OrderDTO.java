@@ -1,5 +1,6 @@
 package com.eshop.orderservice.dto;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.eshop.orderservice.entity.State;
@@ -16,7 +17,7 @@ public class OrderDTO {
 	
 	private List<ItemDTO> cart;
 	
-	private Double totalPrice;
+	private BigDecimal totalPrice;
 	
 	private State state;
 }

@@ -23,6 +23,7 @@ public class Consumer {
 	private final String logTopicName = "${log.topic.name}";
 	private final String customerRegistrationTopicName = "${customer-registration.topic.name}";
 	private final String adminCreationTopicName = "${admin-creation.topic.name}";
+	private final String passwordRecoveryTopicName = "${password-recovery.topic.name}";
 	private final String paymentConfirmationTopicName = "${payment-confirmation.topic.name}";
 	private final String orderProcessingTopicName = "${order-processing.topic.name}";
 	private final String orderCancellationTopicName = "${order-cancellation.topic.name}";
@@ -32,7 +33,7 @@ public class Consumer {
 		notificationService.log(message);
 	}
 	
-	@KafkaListener(topics = { customerRegistrationTopicName, adminCreationTopicName })
+	@KafkaListener(topics = { customerRegistrationTopicName, adminCreationTopicName, passwordRecoveryTopicName })
 	public void consumeUserEmail(ConsumerRecord<String, String> record) throws MessagingException, BusinessException {
 		Pattern pattern = Pattern.compile("\\(userId: (\\d+)\\)");
         Matcher matcher = pattern.matcher(record.value());
@@ -43,6 +44,8 @@ public class Consumer {
         		notificationService.sendConfirmRegistratonEmail(userId);
         	}else if(record.topic().equals(environment.getProperty("admin-creation.topic.name"))) {
         		notificationService.sendCompleteRegistratonEmail(userId);
+        	}else if(record.topic().equals(environment.getProperty("password-recovery.topic.name"))) {
+        		notificationService.sendPasswordRecoveryEmail(userId);
         	}
         	
         }else {

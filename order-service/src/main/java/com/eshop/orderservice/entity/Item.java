@@ -1,5 +1,7 @@
 package com.eshop.orderservice.entity;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -40,6 +42,6 @@ public class Item {
 	private Integer amount;
 	
 	@Column
-	private Double price;
+	private BigDecimal price;
 	
 }
