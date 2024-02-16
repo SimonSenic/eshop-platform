@@ -23,6 +23,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.eshop.userservice.dto.UpdateUserDTO;
 import com.eshop.userservice.dto.UserDTO;
+import com.eshop.userservice.dto.UserEmailDTO;
 import com.eshop.userservice.entity.User;
 import com.eshop.userservice.exception.BusinessException;
 import com.eshop.userservice.exception.NotFoundException;
@@ -95,8 +96,8 @@ public class UserService implements UserDetailsService{
 		return userMapper.toDTO(user);
 	}
 	
-	public void recoverPassword() {
-		User user = userRepository.findByUsername(userAuthentication.getAuthentication().getName())
+	public void recoverPassword(UserEmailDTO userEmailDTO) {
+		User user = userRepository.findByEmail(userEmailDTO.getEmail())
 				.orElseThrow(() -> new NotFoundException("User not found"));
 		log.info("Send password recovery email (userId: {})", user.getId());
 	}

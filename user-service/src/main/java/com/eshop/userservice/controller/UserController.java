@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.eshop.userservice.dto.UpdateUserDTO;
 import com.eshop.userservice.dto.UserDTO;
+import com.eshop.userservice.dto.UserEmailDTO;
 import com.eshop.userservice.service.UserService;
 
 import jakarta.servlet.ServletException;
@@ -42,8 +43,8 @@ public class UserController {
 	}
 	
 	@PostMapping("/recover-password")
-	public void recoverPassword(){
-		userService.recoverPassword();
+	public void recoverPassword(@RequestBody @Valid UserEmailDTO userEmailDTO){
+		userService.recoverPassword(userEmailDTO);
 	}
 	
 	@PatchMapping("/set-new-password")

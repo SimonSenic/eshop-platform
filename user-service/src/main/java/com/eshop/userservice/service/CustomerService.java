@@ -52,6 +52,10 @@ public class CustomerService {
                 
                 User user = userRepository.findByUsername(decodedJWT.getSubject())
                 		.orElseThrow(() -> new NotFoundException("User not found"));
+                if(user.getActive()){
+        			throw new BusinessException("User was already activated");
+        		}
+                
                 user.setActive(true);
                 userRepository.save(user);
                 log.info("Customer registration confirmed (userId: {})", user.getId());

@@ -42,8 +42,10 @@ public class SecurityConfig {
         http.authorizeHttpRequests().requestMatchers("/user-service/customer/**").permitAll();
         http.authorizeHttpRequests().requestMatchers(POST, "/user-service/admin/create-admin").hasAnyAuthority("ADMIN");
         http.authorizeHttpRequests().requestMatchers(PUT, "/user-service/admin/complete-registration").permitAll();
-        http.authorizeHttpRequests().requestMatchers(GET, "/user-service/admin/get-user/{id}").access(hasIpAddress("192.168.100.227"));
+        http.authorizeHttpRequests().requestMatchers(GET, "/user-service/admin/get-user/{id}").access(hasIpAddress("192.168.100.186"));
+        http.authorizeHttpRequests().requestMatchers(GET, "/user-service/admin/get-user/{id}").hasAnyAuthority("ADMIN");
         http.authorizeHttpRequests().requestMatchers(POST, "/user-service/user/login").permitAll();
+        http.authorizeHttpRequests().requestMatchers(POST, "/user-service/user/recover-password").permitAll();
         http.authorizeHttpRequests().requestMatchers("/user-service/user/**").hasAnyAuthority("ADMIN", "CUSTOMER");
         http.authorizeHttpRequests().requestMatchers("/swagger-ui/**").permitAll();
         http.authorizeHttpRequests().requestMatchers("/v3/api-docs/**").permitAll();

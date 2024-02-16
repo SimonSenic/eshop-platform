@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.eshop.userservice.dto.CreateAdminDTO;
+import com.eshop.userservice.dto.UserEmailDTO;
 import com.eshop.userservice.dto.UpdateAdminDTO;
 import com.eshop.userservice.dto.UserDTO;
 import com.eshop.userservice.service.AdminService;
@@ -26,7 +26,7 @@ public class AdminController {
 	private final AdminService adminService;
 	
 	@PostMapping("/create-admin")
-	public ResponseEntity<UserDTO> createAdmin(@RequestBody @Valid CreateAdminDTO createAdminDTO) {
+	public ResponseEntity<UserDTO> createAdmin(@RequestBody @Valid UserEmailDTO createAdminDTO) {
 		return ResponseEntity.status(HttpStatus.CREATED).body(adminService.createAdmin(createAdminDTO));
 	}
 	
