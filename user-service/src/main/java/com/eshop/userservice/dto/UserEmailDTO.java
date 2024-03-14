@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 
 @Data
-//@Builder
 public class UserEmailDTO {
 	@NotNull(message = EMAIL_NOT_NULL)
 	@Email(regexp = EMAIL_REGEXP, message = EMAIL_MSG)

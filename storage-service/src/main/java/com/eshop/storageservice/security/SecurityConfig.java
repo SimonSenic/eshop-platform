@@ -36,7 +36,7 @@ public class SecurityConfig {
         http.csrf().disable();
         http.authorizeHttpRequests().requestMatchers(GET, "/storage-service/products/**").permitAll();
         http.authorizeHttpRequests().requestMatchers(POST, "/storage-service/products/{id}/order").hasAnyAuthority("CUSTOMER");
-        http.authorizeHttpRequests().requestMatchers(PUT, "/storage-service/products/{id}/update-availability").access(hasIpAddress("192.168.100.227"));
+        http.authorizeHttpRequests().requestMatchers(PUT, "/storage-service/products/{id}/update-availability").access(hasIpAddress("192.168.100.186"));
         http.authorizeHttpRequests().requestMatchers("/storage-service/products/**").hasAnyAuthority("ADMIN");
         http.authorizeHttpRequests().requestMatchers("/swagger-ui/**").permitAll();
         http.authorizeHttpRequests().requestMatchers("/v3/api-docs/**").permitAll();

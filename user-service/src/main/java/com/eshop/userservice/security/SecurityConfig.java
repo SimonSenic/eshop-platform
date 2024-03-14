@@ -48,6 +48,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests().requestMatchers(POST, "/user-service/user/recover-password").permitAll();
         http.authorizeHttpRequests().requestMatchers("/user-service/user/**").hasAnyAuthority("ADMIN", "CUSTOMER");
         http.authorizeHttpRequests().requestMatchers("/swagger-ui/**").permitAll();
+        http.authorizeHttpRequests().requestMatchers("/swagger-resources/**").permitAll();
         http.authorizeHttpRequests().requestMatchers("/v3/api-docs/**").permitAll();
         http.authorizeHttpRequests().requestMatchers("/actuator/**").permitAll();
         http.exceptionHandling().accessDeniedHandler(accessDeniedHandler());

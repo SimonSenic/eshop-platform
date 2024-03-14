@@ -28,12 +28,12 @@ public class AdminService {
 	private final UserMapper userMapper;
 	private final Environment environment;
 	
-	public UserDTO createAdmin(UserEmailDTO createAdminDTO) {
-		if(userRepository.findByEmail(createAdminDTO.getEmail()).isPresent()) {
+	public UserDTO createAdmin(UserEmailDTO userEmailDTO) {
+		if(userRepository.findByEmail(userEmailDTO.getEmail()).isPresent()) {
 			throw new BusinessException("Email is already occupied");
 		}
 		
-		User user = new User(createAdminDTO.getEmail(), Role.ADMIN, false);
+		User user = new User(userEmailDTO.getEmail(), Role.ADMIN, false);
 		userRepository.save(user);
 		log.info("Admin created successfully (userId: {})", user.getId());
 		log.info("Send complete registration email (userId: {})", user.getId());

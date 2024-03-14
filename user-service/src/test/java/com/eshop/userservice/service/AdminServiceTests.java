@@ -1,89 +1,111 @@
 package com.eshop.userservice.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.env.Environment;
 
-import com.eshop.userservice.UserServiceApplication;
+import com.eshop.userservice.dto.UserEmailDTO;
+import com.eshop.userservice.dto.UpdateAdminDTO;
 import com.eshop.userservice.dto.UserDTO;
 import com.eshop.userservice.entity.Role;
+import com.eshop.userservice.entity.User;
+import com.eshop.userservice.exception.BusinessException;
+import com.eshop.userservice.mapper.UserMapper;
+import com.eshop.userservice.repository.UserRepository;
 
-//@SpringBootTest(classes = UserServiceApplication.class)
-public class AdminServiceTests {
-	//@MockBean
+@SpringBootTest
+class AdminServiceTests {
+	
+	@InjectMocks
 	private AdminService adminService;
 	
-	private static final String USERNAME = "User123";
-	private static final String PASSWORD = "Password123!";
-	private static final String EMAIL = "email@gmail.com";
-
-	/*@Test
-	void testSuccessfullyGetUsers() {
-		UserDTO user1 = UserDTO.builder()
+	@Mock
+	private UserRepository userRepository;
+	
+	@Mock
+	private UserMapper userMapper;
+	
+	@Mock
+	private Environment environment;
+	
+	private final String USERNAME = "User123";
+	private final String PASSWORD = "Password123!";
+	private final String EMAIL = "user@gmail.com";
+	private final String FIRSTNAME = "Firstname";
+	private final String LASTNAME = "Lastname";
+	private final String ADDRESS = "Address 123";
+	
+	@Test
+	void testSuccessfullyCreateAdmin() {
+		UserEmailDTO userEmailDTO = new UserEmailDTO();
+		userEmailDTO.setEmail(EMAIL);
+		
+		UserDTO userDTO = UserDTO.builder()
 				.id(1L)
-        		.username("User1")
-        		.password("Password123!")
-        		.email("email1@gmail.com").build();
+        		.email(EMAIL)
+        		.role(Role.ADMIN)
+        		.active(false).build();
 		
-		UserDTO user2 = UserDTO.builder()
-				.id(2L)
-        		.username("User2")
-        		.password("Password123!")
-        		.email("email2@gmail.com").build();
+		when(userRepository.save(any(User.class))).thenReturn(new User(EMAIL, Role.ADMIN, false));
+		when(userMapper.toDTO(any(User.class))).thenReturn(userDTO);
 		
-		List<UserDTO> users = new ArrayList<>();
-		users.add(user1);
-		users.add(user2);
+		UserDTO result = adminService.createAdmin(userEmailDTO);
 		
-		when(adminService.getUsers()).thenReturn(users);
+		verify(userRepository).save(any(User.class));
 		
-		List<UserDTO> result = adminService.getUsers();
+		assertThat(result).isNotNull()
+		.extracting(UserDTO::getId, UserDTO::getEmail, UserDTO::getRole, UserDTO::getActive)
+		.containsExactly(1L, EMAIL, Role.ADMIN, false);
+	}
+	
+	@Test
+	void testFailCompleteRegistration() {
+		String verificationToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYXJyeXBvdHRlciIsInJvbGVzIjpbIkNVU1RPTUVSIl0sImlzcyI6Imh0dHA"
+				+ "6Ly9ob3N0LmRvY2tlci5pbnRlcm5hbDo4MDgwL3VzZXItc2VydmljZS91c2VyL2xvZ2luIiwiZXhwIjoxNjkyNjUzMTg0fQ.hQthbAFWTqIBrOsxIJI05__PX3BnVZhBES37baVWwfw";
 		
-		assertThat(result).isNotNull().isNotEmpty();
-		assertEquals(result.get(0).getUsername(), user1.getUsername());
-		assertEquals(result.get(1).getEmail(), user2.getEmail());
+		UpdateAdminDTO updateAdminDTO = UpdateAdminDTO.builder()
+				.username(USERNAME)
+				.password(PASSWORD).build();
+		
+		when(environment.getProperty(anyString())).thenReturn("secret");
+		
+		assertThrows(BusinessException.class, () -> adminService.completeRegistration(updateAdminDTO, verificationToken));
 	}
 	
 	@Test
 	void testSuccessfullyGetUser() {
-		UserDTO user = UserDTO.builder()
-				.id(1L)
-        		.username(USERNAME)
-        		.password(PASSWORD)
-        		.email(EMAIL).build();
-		
-		when(adminService.getUser(Mockito.anyString())).thenReturn(user);
-		
-		UserDTO result = adminService.getUser(USERNAME);
-		
-		assertThat(result).isNotNull()
-		.extracting(UserDTO::getId, UserDTO::getUsername, UserDTO::getEmail)
-		.containsExactly(1L, USERNAME, EMAIL);
-	}
-	
-	@Test
-	void testSuccessfullyCreateAdmin() {
 		UserDTO userDTO = UserDTO.builder()
 				.id(1L)
         		.username(USERNAME)
         		.password(PASSWORD)
-        		.role(Role.ADMIN).build();
+        		.email(EMAIL)
+        		.firstName(FIRSTNAME)
+        		.lastName(LASTNAME)
+        		.address(ADDRESS)
+        		.role(Role.CUSTOMER)
+        		.active(true).build();
 		
-		when(adminService.createAdmin(Mockito.any(UserDTO.class))).thenReturn(userDTO);
+		when(userRepository.findById(anyLong())).thenReturn(
+				Optional.of(new User(USERNAME, PASSWORD, EMAIL, FIRSTNAME, LASTNAME, ADDRESS, Role.CUSTOMER, true)));
+		when(userMapper.toDTO(any(User.class))).thenReturn(userDTO);
 		
-		UserDTO result = adminService.createAdmin(userDTO);
+		UserDTO result = adminService.getUser(1L);
 		
 		assertThat(result).isNotNull()
-		.extracting(UserDTO::getId, UserDTO::getUsername, UserDTO::getRole)
-		.containsExactly(1L, USERNAME, Role.ADMIN);
-	}*/
+		.extracting(UserDTO::getId, UserDTO::getUsername, UserDTO::getRole, UserDTO::getActive)
+		.containsExactly(1L, USERNAME, Role.CUSTOMER, true);
+	}
 
 }

@@ -124,7 +124,7 @@ public class OrderService {
 	@Retry(fallbackMethod = "userServiceDownFallback", name = "")
 	public void createOrder(ProductDTO product, Integer amount, String token) {
 		UserDTO user = apiClient.getUserProfile(token).getBody();
-		List<SimpleGrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority(user.getRole().name()));
+		List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(user.getRole().name()));
 		Authentication auth = new UsernamePasswordAuthenticationToken(user.getUsername(), null, authorities);
 		SecurityContextHolder.getContext().setAuthentication(auth);
 		

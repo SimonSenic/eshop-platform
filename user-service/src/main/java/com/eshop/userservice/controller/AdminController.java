@@ -26,8 +26,8 @@ public class AdminController {
 	private final AdminService adminService;
 	
 	@PostMapping("/create-admin")
-	public ResponseEntity<UserDTO> createAdmin(@RequestBody @Valid UserEmailDTO createAdminDTO) {
-		return ResponseEntity.status(HttpStatus.CREATED).body(adminService.createAdmin(createAdminDTO));
+	public ResponseEntity<UserDTO> createAdmin(@RequestBody @Valid UserEmailDTO userEmailDTO) {
+		return ResponseEntity.status(HttpStatus.CREATED).body(adminService.createAdmin(userEmailDTO));
 	}
 	
 	@PutMapping("/complete-registration")

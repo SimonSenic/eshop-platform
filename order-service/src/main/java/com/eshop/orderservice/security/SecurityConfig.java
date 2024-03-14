@@ -40,7 +40,7 @@ public class SecurityConfig {
         http.csrf().disable();
         http.authorizeHttpRequests().requestMatchers(GET, "/order-service/orders").hasAnyAuthority("ADMIN");
         http.authorizeHttpRequests().requestMatchers(GET, "/order-service/orders/my").hasAnyAuthority("CUSTOMER");
-        http.authorizeHttpRequests().requestMatchers(GET, "/order-service/orders/{id}").access(hasIpAddress("192.168.100.227"));
+        http.authorizeHttpRequests().requestMatchers(GET, "/order-service/orders/{id}").access(hasIpAddress("192.168.100.186"));
         http.authorizeHttpRequests().requestMatchers(GET, "/order-service/orders/{id}").hasAnyAuthority("ADMIN", "CUSTOMER");
         http.authorizeHttpRequests().requestMatchers(PATCH, "/order-service/orders/{id}/process").hasAnyAuthority("ADMIN");
         http.authorizeHttpRequests().requestMatchers("/order-service/orders/**").hasAnyAuthority("CUSTOMER");
