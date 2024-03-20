@@ -30,7 +30,7 @@ public class Order extends BaseEntity {
 	@NonNull
 	private Long userId;
 	
-	@OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@NonNull
 	private List<Item> cart;
 	

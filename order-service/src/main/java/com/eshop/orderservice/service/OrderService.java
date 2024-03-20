@@ -2,7 +2,6 @@ package com.eshop.orderservice.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -72,12 +71,11 @@ public class OrderService {
 				item.setPrice(product.getPrice().multiply(BigDecimal.valueOf(amount)));
 			}else {
 				order.getCart().remove(item);
-				itemRepository.delete(item);
 			}
 			order.setTotalPrice(BigDecimal.valueOf(0));
 			order.getCart().forEach(temp -> order.setTotalPrice(order.getTotalPrice().add(temp.getPrice())));
 		}else {
-			itemRepository.deleteAllByOrderId(id);
+			order.getCart().clear();
 			order.setTotalPrice(BigDecimal.valueOf(0));
 		}
 		

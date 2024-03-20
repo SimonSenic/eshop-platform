@@ -122,7 +122,6 @@ class UserServiceTests {
 		UserDTO userDTO = UserDTO.builder()
 				.id(1L)
 				.username(USERNAME)
-				.password(PASSWORD)
 				.role(Role.CUSTOMER)
 				.active(true).build();
 		
