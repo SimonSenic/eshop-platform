@@ -36,7 +36,6 @@ INDEX VERSION 1.134+C:\Users\simon\Desktop\projects\eshop-platform\.metadata\.pl
 3899697703.index
 738681337.index
 2264993467.index
-1118982603.index
 1853325893.index
 4149938940.index
 3478533664.index
