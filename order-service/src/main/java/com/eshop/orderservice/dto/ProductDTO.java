@@ -12,7 +12,11 @@ public class ProductDTO {
 	
 	private String name;
 	
+	private String description;
+	
 	private BigDecimal price;
 	
 	private int availability;
+	
+	private String image;
 }

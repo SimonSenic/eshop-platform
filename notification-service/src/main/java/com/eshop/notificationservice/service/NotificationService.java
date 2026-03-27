@@ -3,6 +3,7 @@ package com.eshop.notificationservice.service;
 import java.util.Date;
 
 import org.springframework.core.env.Environment;
+import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -133,8 +134,13 @@ public class NotificationService {
 		mailSender.send(message);
 	}
 	
-	private void servicesDownFallback(Exception e) {
-        throw new BusinessException("Services are down");
+	private void servicesDownFallback(Exception exception) throws Exception {
+        if(!(exception instanceof BusinessException) && !(exception instanceof MessagingException) 
+        		&& !(exception instanceof MailAuthenticationException)) {
+			throw new BusinessException("Services are down");
+		}else {
+			throw exception;
+		}
     }
 	
 	private String generateVerificationToken(UserDTO user) {
@@ -143,6 +149,7 @@ public class NotificationService {
 		if(user.getRole().equals(Role.ADMIN) && !user.getActive()) {
 			subject = user.getEmail();
 		}
+		
 	    String verificationToken = JWT.create()
 	    		.withSubject(subject)
 	    		.withExpiresAt(new Date(System.currentTimeMillis() + 168 * 60 * 60 * 1000))

@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -51,10 +52,12 @@ class StorageServiceTests {
 	private Producer producer;
 	
 	private final String PRODUCT_NAME = "Product 1";
+	private final String PRODUCT_DESCRIPTION = "Product 1 Description";
 	private final BigDecimal PRODUCT_PRICE = BigDecimal.valueOf(2.60);
 	private final int PRODUCT_AVAILABILITY = 3;
 	
 	private final String PRODUCT2_NAME = "Product 2";
+	private final String PRODUCT2_DESCRIPTION = "Product 2 Description";
 	private final BigDecimal PRODUCT2_PRICE = BigDecimal.valueOf(1.80);
 	private final int PRODUCT2_AVAILABILITY = 5;
 	
@@ -67,18 +70,20 @@ class StorageServiceTests {
 
 	@Test
 	void testSuccessfullyGetProducts() {
-		Product product = new Product(PRODUCT_NAME, PRODUCT_PRICE, PRODUCT_AVAILABILITY);
-		Product product2 = new Product(PRODUCT2_NAME, PRODUCT2_PRICE, PRODUCT2_AVAILABILITY);
+		Product product = new Product(PRODUCT_NAME, PRODUCT_DESCRIPTION, PRODUCT_PRICE, PRODUCT_AVAILABILITY, null);
+		Product product2 = new Product(PRODUCT2_NAME, PRODUCT2_DESCRIPTION, PRODUCT2_PRICE, PRODUCT2_AVAILABILITY, null);
 		
 		ProductDTO productDTO = ProductDTO.builder()
 				.id(1L)
 				.name(PRODUCT_NAME)
+				.description(PRODUCT_DESCRIPTION)
 				.price(PRODUCT_PRICE)
 				.availability(PRODUCT_AVAILABILITY).build();
 		
 		ProductDTO product2DTO = ProductDTO.builder()
 				.id(2L)
 				.name(PRODUCT2_NAME)
+				.description(PRODUCT2_DESCRIPTION)
 				.price(PRODUCT2_PRICE)
 				.availability(PRODUCT2_AVAILABILITY).build();
 		
@@ -91,10 +96,10 @@ class StorageServiceTests {
 		Page<ProductDTO> result = storageService.getProducts(PageRequest.of(0, 20));
 		
 		assertThat(result).isNotNull().isNotEmpty()
-		.extracting(ProductDTO::getId, ProductDTO::getName, ProductDTO::getPrice, ProductDTO::getAvailability)
+		.extracting(ProductDTO::getId, ProductDTO::getName, ProductDTO::getDescription, ProductDTO::getPrice, ProductDTO::getAvailability)
 		.containsExactly(
-				tuple(1L, PRODUCT_NAME, PRODUCT_PRICE, PRODUCT_AVAILABILITY),
-				tuple(2L, PRODUCT2_NAME, PRODUCT2_PRICE, PRODUCT2_AVAILABILITY));
+				tuple(1L, PRODUCT_NAME, PRODUCT_DESCRIPTION, PRODUCT_PRICE, PRODUCT_AVAILABILITY),
+				tuple(2L, PRODUCT2_NAME, PRODUCT2_DESCRIPTION, PRODUCT2_PRICE, PRODUCT2_AVAILABILITY));
 	}
 	
 	@Test
@@ -102,32 +107,35 @@ class StorageServiceTests {
 		ProductDTO productDTO = ProductDTO.builder()
 				.id(1L)
 				.name(PRODUCT_NAME)
+				.description(PRODUCT_DESCRIPTION)
 				.price(PRODUCT_PRICE)
 				.availability(PRODUCT_AVAILABILITY).build();
 		
 		when(storageRepository.findById(anyLong())).thenReturn(
-				Optional.of(new Product(PRODUCT_NAME, PRODUCT_PRICE, PRODUCT_AVAILABILITY)));
+				Optional.of(new Product(PRODUCT_NAME, PRODUCT_DESCRIPTION, PRODUCT_PRICE, PRODUCT_AVAILABILITY, null)));
 		when(productMapper.toDTO(any(Product.class))).thenReturn(productDTO);
 		
 		ProductDTO result = storageService.getProduct(1L);
 		
 		assertThat(result).isNotNull()
-		.extracting(ProductDTO::getId, ProductDTO::getName, ProductDTO::getPrice, ProductDTO::getAvailability)
-		.containsExactly(1L, PRODUCT_NAME, PRODUCT_PRICE, PRODUCT_AVAILABILITY);
+		.extracting(ProductDTO::getId, ProductDTO::getName, ProductDTO::getDescription, ProductDTO::getPrice, ProductDTO::getAvailability)
+		.containsExactly(1L, PRODUCT_NAME, PRODUCT_DESCRIPTION, PRODUCT_PRICE, PRODUCT_AVAILABILITY);
 	}
 	
 	 @Test
-	 void testSuccessfullyAddProduct() {
+	 void testSuccessfullyAddProduct() throws IOException {
 		 ProductDTO productDTO = ProductDTO.builder()
 					.id(1L)
 					.name(PRODUCT_NAME)
+					.description(PRODUCT_DESCRIPTION)
 					.price(PRODUCT_PRICE)
 					.availability(PRODUCT_AVAILABILITY).build();
 		 
-		 when(storageRepository.save(any(Product.class))).thenReturn(new Product(PRODUCT_NAME, PRODUCT_PRICE, PRODUCT_AVAILABILITY));
+		 when(storageRepository.save(any(Product.class)))
+		 	.thenReturn(new Product(PRODUCT_NAME, PRODUCT_DESCRIPTION, PRODUCT_PRICE, PRODUCT_AVAILABILITY, null));
 		 when(productMapper.toDTO(any(Product.class))).thenReturn(productDTO);
 		 
-		 ProductDTO result = storageService.addProduct(productDTO);
+		 ProductDTO result = storageService.addProduct(productDTO, null);
 		 
 		 verify(storageRepository).save(any(Product.class));
 		 
@@ -137,8 +145,8 @@ class StorageServiceTests {
 	 }
 	 
 	 @Test
-	 void testSuccessfullyUpdateProduct() {
-		 Product product = new Product(PRODUCT_NAME, PRODUCT_PRICE, PRODUCT_AVAILABILITY);
+	 void testSuccessfullyUpdateProduct() throws IOException {
+		 Product product = new Product(PRODUCT_NAME, PRODUCT_DESCRIPTION, PRODUCT_PRICE, PRODUCT_AVAILABILITY, null);
 		 
 		 ProductDTO productDTO = ProductDTO.builder()
 					.id(1L)
@@ -152,6 +160,7 @@ class StorageServiceTests {
 		 ProductDTO mappedProductDTO = ProductDTO.builder()
 					.id(1L)
 					.name(PRODUCT_NAME)
+					.description(PRODUCT_DESCRIPTION)
 					.price(PRODUCT2_PRICE)
 					.availability(PRODUCT2_AVAILABILITY).build();
 		 
@@ -159,13 +168,13 @@ class StorageServiceTests {
 		 when(productMapper.updateProduct(any(Product.class), any(ProductDTO.class))).thenReturn(updatedProduct);
 		 when(productMapper.toDTO(any(Product.class))).thenReturn(mappedProductDTO);
 		 
-		 ProductDTO result = storageService.updateProduct(1L, productDTO);
+		 ProductDTO result = storageService.updateProduct(1L, productDTO, null);
 		 
 		 verify(storageRepository).save(any(Product.class));
 		 
 		 assertThat(result).isNotNull()
-			.extracting(ProductDTO::getId, ProductDTO::getName, ProductDTO::getPrice, ProductDTO::getAvailability)
-			.containsExactly(1L, PRODUCT_NAME, PRODUCT2_PRICE, PRODUCT2_AVAILABILITY);
+			.extracting(ProductDTO::getId, ProductDTO::getName, ProductDTO::getDescription, ProductDTO::getPrice, ProductDTO::getAvailability)
+			.containsExactly(1L, PRODUCT_NAME, PRODUCT_DESCRIPTION, PRODUCT2_PRICE, PRODUCT2_AVAILABILITY);
 	 }
 	 
 	 @Test
@@ -173,10 +182,12 @@ class StorageServiceTests {
 		 ProductDTO productDTO = ProductDTO.builder()
 					.id(1L)
 					.name(PRODUCT_NAME)
+					.description(PRODUCT_DESCRIPTION)
 					.price(PRODUCT_PRICE)
 					.availability(PRODUCT_AVAILABILITY).build();
 		 
-		 when(storageRepository.findById(anyLong())).thenReturn(Optional.of(new Product(PRODUCT_NAME, PRODUCT_PRICE, PRODUCT_AVAILABILITY)));
+		 when(storageRepository.findById(anyLong()))
+		 	.thenReturn(Optional.of(new Product(PRODUCT_NAME, PRODUCT_DESCRIPTION, PRODUCT_PRICE, PRODUCT_AVAILABILITY, null)));
 		 when(productMapper.toDTO(any(Product.class))).thenReturn(productDTO);
 		 when(userAuthentication.getRequest()).thenReturn(request);
 		 
@@ -188,7 +199,7 @@ class StorageServiceTests {
 	 @Test
 	 void testSuccessfullyUpdateAvailability() {
 		 when(storageRepository.findById(anyLong())).thenReturn(
-				 Optional.of(new Product(PRODUCT_NAME, PRODUCT_PRICE, PRODUCT_AVAILABILITY)));
+				 Optional.of(new Product(PRODUCT_NAME, PRODUCT_DESCRIPTION, PRODUCT_PRICE, PRODUCT_AVAILABILITY, null)));
 		 
 		 storageService.updateAvailability(1L, 2);
 		 

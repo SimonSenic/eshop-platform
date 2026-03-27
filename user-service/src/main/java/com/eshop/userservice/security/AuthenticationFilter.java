@@ -39,8 +39,11 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException {
 		String body = null;
-	    try { body = request.getReader().lines().collect(Collectors.joining()); }
-	    catch (Exception e) { e.printStackTrace(); }
+	    try { 
+	    	body = request.getReader().lines().collect(Collectors.joining()); 
+	    }catch (Exception e) { 
+	    	e.printStackTrace(); 
+	    }
 
 	    JSONObject jsonObject = new JSONObject(body);
 	    String username = jsonObject.getString("username");
@@ -58,13 +61,13 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
 	    Algorithm algorithm = Algorithm.HMAC256(environment.getProperty("secret.key").getBytes());
 	    String access_token = JWT.create()
 	    		.withSubject(user.getUsername())
-	    		.withExpiresAt(new Date(System.currentTimeMillis() + 20 * 60 * 1000))
+	    		.withExpiresAt(new Date(System.currentTimeMillis() + 20 * 60 * 1000)) //20 minutes
 	            .withIssuer(request.getRequestURL().toString())
 	            .withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
 	            .sign(algorithm);
 	    String refresh_token = JWT.create()
 	    		.withSubject(user.getUsername())
-	    		.withExpiresAt(new Date(System.currentTimeMillis() + 6 * 60 * 60 * 1000))
+	    		.withExpiresAt(new Date(System.currentTimeMillis() + 6 * 60 * 60 * 1000)) //6 hours
 	            .withIssuer(request.getRequestURL().toString())
 	            .sign(algorithm);
 	   

@@ -10,6 +10,7 @@ import com.eshop.orderservice.entity.Order;
 
 @Mapper(componentModel="spring")
 public interface OrderMapper {
+	
 	OrderDTO toDTO(Order order);
 	
 	default Page<OrderDTO> toDTOs(Page<Order> orders){

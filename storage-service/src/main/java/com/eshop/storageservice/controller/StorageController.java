@@ -1,5 +1,7 @@
 package com.eshop.storageservice.controller;
 
+import java.io.IOException;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -9,10 +11,11 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.eshop.storageservice.dto.ProductDTO;
 import com.eshop.storageservice.service.StorageService;
@@ -37,13 +40,15 @@ public class StorageController {
 	}
 	
 	@PostMapping("/add")
-	public ResponseEntity<ProductDTO> addProduct(@RequestBody @Valid ProductDTO productDTO) {
-		return ResponseEntity.status(HttpStatus.CREATED).body(storageService.addProduct(productDTO));
+	public ResponseEntity<ProductDTO> addProduct(@RequestPart @Valid ProductDTO productDTO, 
+			@RequestPart(required = false) MultipartFile image) throws IOException {
+		return ResponseEntity.status(HttpStatus.CREATED).body(storageService.addProduct(productDTO, image));
 	}
 	
 	@PatchMapping("/{id}/update")
-	public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @RequestBody @Valid ProductDTO productDTO){
-		return ResponseEntity.ok(storageService.updateProduct(id, productDTO));
+	public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @RequestPart @Valid ProductDTO productDTO, 
+			@RequestPart(required = false) MultipartFile image) throws IOException{
+		return ResponseEntity.ok(storageService.updateProduct(id, productDTO, image));
 	}
 	
 	@PostMapping("/{id}/order")

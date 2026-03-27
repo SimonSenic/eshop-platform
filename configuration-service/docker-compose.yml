@@ -1,4 +1,4 @@
-version: "3.7"
+version: "1.0"
 
 networks:
   kafka-net:
@@ -7,16 +7,35 @@ networks:
 
 services:
   zookeeper:
-    image: wurstmeister/zookeeper
+    image: confluentinc/cp-zookeeper:7.6.0
     container_name: zookeeper
     restart: "no"
     networks:
       - kafka-net
     ports:
       - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 0
+      ZOOKEEPER_SECURE_CLIENT_PORT: 2181
+      ZOOKEEPER_SSL_CLIENT_ENABLE: true
+      ZOOKEEPER_SSL_CLIENT_AUTH: need
+      ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /ssl/truststore.jks
+      ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: password
+      ZOOKEEPER_SSL_KEYSTORE_LOCATION: /ssl/keystore.jks
+      ZOOKEEPER_SSL_KEYSTORE_PASSWORD: password
+      ZOOKEEPER_SERVER_CNXN_FACTORY: org.apache.zookeeper.server.NettyServerCnxnFactory
+      ZOOKEEPER_REQUIRE_CLIENT_AUTH_SCHEME: sasl
+      ZOOKEEPER_AUTH_PROVIDER_1: org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+      KAFKA_OPTS: 
+        -Djava.security.auth.login.config=/sasl/jaas.conf
+    volumes:
+      - ./ssl:/ssl
+      - ./sasl:/sasl
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-log:/var/lib/zookeeper/log
 
   kafka:
-    image: wurstmeister/kafka
+    image: confluentinc/cp-kafka:7.6.0
     container_name: kafka
     restart: "no"
     networks:
@@ -30,19 +49,33 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_BROKER_ID: 1
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER_INTERNAL:SSL,DOCKER_EXTERNAL:SSL
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER_INTERNAL:SASL_SSL,DOCKER_EXTERNAL:SASL_SSL
       KAFKA_SSL_TRUSTSTORE_LOCATION: /ssl/truststore.jks
       KAFKA_SSL_TRUSTSTORE_PASSWORD: password
       KAFKA_SSL_KEYSTORE_LOCATION: /ssl/keystore.jks
       KAFKA_SSL_KEYSTORE_PASSWORD: password
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
+      KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE: true
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /ssl/truststore.jks
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: password
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_LOCATION: /ssl/keystore.jks
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_PASSWORD: password
+      KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNetty
+      KAFKA_ZOOKEEPER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
+      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-256
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-256
+      ZOOKEEPER_SASL_ENABLED: true
+      KAFKA_OPTS:
+        -Djava.security.auth.login.config=/sasl/jaas.conf
+        -Dzookeeper.sasl.client=true
     depends_on:
       - zookeeper
     volumes:
       - ./ssl:/ssl
+      - ./sasl:/sasl
       
   kafka2:
-    image: wurstmeister/kafka
+    image: confluentinc/cp-kafka:7.6.0
     container_name: kafka2
     restart: "no"
     networks:
@@ -56,19 +89,33 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_BROKER_ID: 2
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER_INTERNAL:SSL,DOCKER_EXTERNAL:SSL
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER_INTERNAL:SASL_SSL,DOCKER_EXTERNAL:SASL_SSL
       KAFKA_SSL_TRUSTSTORE_LOCATION: /ssl/truststore.jks
       KAFKA_SSL_TRUSTSTORE_PASSWORD: password
       KAFKA_SSL_KEYSTORE_LOCATION: /ssl/keystore.jks
       KAFKA_SSL_KEYSTORE_PASSWORD: password
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
+      KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE: true
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /ssl/truststore.jks
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: password
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_LOCATION: /ssl/keystore.jks
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_PASSWORD: password
+      KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNetty
+      KAFKA_ZOOKEEPER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
+      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-256
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-256
+      ZOOKEEPER_SASL_ENABLED: true
+      KAFKA_OPTS: 
+        -Djava.security.auth.login.config=/sasl/jaas.conf
+        -Dzookeeper.sasl.client=true
     depends_on:
       - zookeeper
     volumes:
       - ./ssl:/ssl
+      - ./sasl:/sasl
       
   kafka3:
-    image: wurstmeister/kafka
+    image: confluentinc/cp-kafka:7.6.0
     container_name: kafka3
     restart: "no"
     networks:
@@ -82,19 +129,33 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_BROKER_ID: 3
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER_INTERNAL:SSL,DOCKER_EXTERNAL:SSL
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER_INTERNAL:SASL_SSL,DOCKER_EXTERNAL:SASL_SSL
       KAFKA_SSL_TRUSTSTORE_LOCATION: /ssl/truststore.jks
       KAFKA_SSL_TRUSTSTORE_PASSWORD: password
       KAFKA_SSL_KEYSTORE_LOCATION: /ssl/keystore.jks
       KAFKA_SSL_KEYSTORE_PASSWORD: password
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
+      KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE: true
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /ssl/truststore.jks
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: password
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_LOCATION: /ssl/keystore.jks
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_PASSWORD: password
+      KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNetty
+      KAFKA_ZOOKEEPER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
+      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-256
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-256
+      ZOOKEEPER_SASL_ENABLED: true
+      KAFKA_OPTS: 
+        -Djava.security.auth.login.config=/sasl/jaas.conf
+        -Dzookeeper.sasl.client=true
     depends_on:
       - zookeeper
     volumes:
       - ./ssl:/ssl
+      - ./sasl:/sasl
       
   kafka4:
-    image: wurstmeister/kafka
+    image: confluentinc/cp-kafka:7.6.0
     container_name: kafka4
     restart: "no"
     networks:
@@ -108,19 +169,33 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_BROKER_ID: 4
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER_INTERNAL:SSL,DOCKER_EXTERNAL:SSL
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER_INTERNAL:SASL_SSL,DOCKER_EXTERNAL:SASL_SSL
       KAFKA_SSL_TRUSTSTORE_LOCATION: /ssl/truststore.jks
       KAFKA_SSL_TRUSTSTORE_PASSWORD: password
       KAFKA_SSL_KEYSTORE_LOCATION: /ssl/keystore.jks
       KAFKA_SSL_KEYSTORE_PASSWORD: password
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
+      KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE: true
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /ssl/truststore.jks
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: password
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_LOCATION: /ssl/keystore.jks
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_PASSWORD: password
+      KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNetty
+      KAFKA_ZOOKEEPER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
+      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-256
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-256
+      ZOOKEEPER_SASL_ENABLED: true
+      KAFKA_OPTS: 
+        -Djava.security.auth.login.config=/sasl/jaas.conf
+        -Dzookeeper.sasl.client=true
     depends_on:
       - zookeeper
     volumes:
       - ./ssl:/ssl
+      - ./sasl:/sasl
       
   kafka5:
-    image: wurstmeister/kafka
+    image: confluentinc/cp-kafka:7.6.0
     container_name: kafka5
     restart: "no"
     networks:
@@ -134,13 +209,31 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_BROKER_ID: 5
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER_INTERNAL:SSL,DOCKER_EXTERNAL:SSL
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER_INTERNAL:SASL_SSL,DOCKER_EXTERNAL:SASL_SSL
       KAFKA_SSL_TRUSTSTORE_LOCATION: /ssl/truststore.jks
       KAFKA_SSL_TRUSTSTORE_PASSWORD: password
       KAFKA_SSL_KEYSTORE_LOCATION: /ssl/keystore.jks
       KAFKA_SSL_KEYSTORE_PASSWORD: password
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
+      KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE: true
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /ssl/truststore.jks
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: password
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_LOCATION: /ssl/keystore.jks
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_PASSWORD: password
+      KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNetty
+      KAFKA_ZOOKEEPER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
+      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-256
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-256
+      ZOOKEEPER_SASL_ENABLED: true
+      KAFKA_OPTS: 
+        -Djava.security.auth.login.config=/sasl/jaas.conf
+        -Dzookeeper.sasl.client=true
     depends_on:
       - zookeeper
     volumes:
       - ./ssl:/ssl
+      - ./sasl:/sasl
+      
+volumes:
+  zookeeper-data:
+  zookeeper-log:

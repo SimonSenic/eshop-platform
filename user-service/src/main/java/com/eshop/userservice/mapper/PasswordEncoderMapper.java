@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 public class PasswordEncoderMapper {
 	private final PasswordEncoder passwordEncoder;
 
-	@EncodedMapping
+	@EncodeMapping
     public String encode(String value) {
         return passwordEncoder.encode(value);
     }
