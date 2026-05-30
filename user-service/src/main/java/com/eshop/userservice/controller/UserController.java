@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.eshop.userservice.dto.UpdateUserDTO;
@@ -48,7 +49,7 @@ public class UserController {
 	}
 	
 	@PatchMapping("/set-new-password")
-	public void setNewPassword(@RequestBody @Valid UpdateUserDTO updateUserDTO, String verificationToken){ 
+	public void setNewPassword(@RequestBody @Valid UpdateUserDTO updateUserDTO, @RequestParam String verificationToken){ 
 		userService.setNewPassword(updateUserDTO, verificationToken);
 	}
 	

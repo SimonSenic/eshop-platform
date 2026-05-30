@@ -9,11 +9,9 @@ import static com.eshop.userservice.dto.UserConstants.USERNAME_NOT_NULL;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
 public class UpdateAdminDTO {
 	@NotNull(message = USERNAME_NOT_NULL)
 	@Size(min = 3, max = 30, message = USERNAME_SIZE)

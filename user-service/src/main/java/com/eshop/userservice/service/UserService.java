@@ -63,13 +63,13 @@ public class UserService implements UserDetailsService{
 		    		.withSubject(user.getUsername())
 		    		.withExpiresAt(new Date(System.currentTimeMillis() + 15 * 60 * 1000))
 		            .withIssuer(request.getRequestURL().toString())
-		            .withClaim("roles", Arrays.asList(user.getRole().name()))
+		            .withClaim("roles", Arrays.asList(user.getRole().toString()))
 		            .sign(algorithm);
 		    
 		    Map<String, String> map = new HashMap<>();
 		    map.put("access_token", access_token);
 		    map.put("refresh_token", request.getHeader("Authorization").substring(7));
-		    map.put("role", user.getRole().name());
+		    map.put("role", user.getRole().toString());
 		    response.setContentType("application/json");
 		    new ObjectMapper().writeValue(response.getOutputStream(), map);
 		}
@@ -78,9 +78,9 @@ public class UserService implements UserDetailsService{
 	public UserDTO updateUser(UpdateUserDTO updateUserDTO) {
 		User user = userRepository.findByUsername(userAuthentication.getAuthentication().getName())
 				.orElseThrow(() -> new NotFoundException("User not found"));
-		if(!passwordEncoder.matches(updateUserDTO.getPassword(), user.getPassword())) { 
+		if(updateUserDTO.getNewPassword() != null && !passwordEncoder.matches(updateUserDTO.getPassword(), user.getPassword())) { 
 			throw new BusinessException("Invalid password");
-		}else if(updateUserDTO.getPassword().equals(updateUserDTO.getNewPassword())) {
+		}else if(updateUserDTO.getNewPassword() != null && updateUserDTO.getNewPassword().equals(updateUserDTO.getPassword())) {
 			throw new BusinessException("New password must not be the same");
 		}
 		

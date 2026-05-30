@@ -1,4 +1,4 @@
-package com.eshop.userservice.service;
+package com.eshop.userservice.unit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,6 +25,8 @@ import com.eshop.userservice.entity.Role;
 import com.eshop.userservice.entity.User;
 import com.eshop.userservice.mapper.UserMapper;
 import com.eshop.userservice.repository.UserRepository;
+import com.eshop.userservice.service.UserAuthentication;
+import com.eshop.userservice.service.UserService;
 
 @SpringBootTest
 class UserServiceTests {
@@ -57,7 +59,8 @@ class UserServiceTests {
 	private final String NEW_USERNAME = "NewUsername";
 	private final String NEW_EMAIL = "new.email@gmail.com";
 	
-	private final Authentication auth = new UsernamePasswordAuthenticationToken(USERNAME, null, List.of(new SimpleGrantedAuthority(Role.CUSTOMER.name())));
+	private final Authentication auth = new UsernamePasswordAuthenticationToken(
+			USERNAME, null, List.of(new SimpleGrantedAuthority(Role.CUSTOMER.toString())));
 
 	@Test
 	void testSuccessfulLogin() {

@@ -1,4 +1,4 @@
-package com.eshop.userservice.service;
+package com.eshop.userservice.unit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,6 +20,7 @@ import com.eshop.userservice.entity.User;
 import com.eshop.userservice.exception.BusinessException;
 import com.eshop.userservice.mapper.UserMapper;
 import com.eshop.userservice.repository.UserRepository;
+import com.eshop.userservice.service.CustomerService;
 
 @SpringBootTest
 class CustomerServiceTests {

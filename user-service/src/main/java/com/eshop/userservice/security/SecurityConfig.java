@@ -3,6 +3,7 @@ package com.eshop.userservice.security;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PUT;
+import static org.springframework.http.HttpMethod.PATCH;
 
 import java.util.Optional;
 
@@ -25,6 +26,9 @@ import org.springframework.security.web.access.intercept.RequestAuthorizationCon
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
 
+import static org.springframework.security.authorization.AuthorizationManagers.anyOf;
+import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAuthority;
+
 import com.eshop.userservice.exception.AccessDeniedExceptionHandler;
 
 @Configuration
@@ -42,10 +46,10 @@ public class SecurityConfig {
         http.authorizeHttpRequests().requestMatchers("/user-service/customer/**").permitAll();
         http.authorizeHttpRequests().requestMatchers(POST, "/user-service/admin/create-admin").hasAnyAuthority("ADMIN");
         http.authorizeHttpRequests().requestMatchers(PUT, "/user-service/admin/complete-registration").permitAll();
-        http.authorizeHttpRequests().requestMatchers(GET, "/user-service/admin/get-user/{id}").access(hasIpAddress("192.168.100.186"));
-        http.authorizeHttpRequests().requestMatchers(GET, "/user-service/admin/get-user/{id}").hasAnyAuthority("ADMIN");
+        http.authorizeHttpRequests().requestMatchers(GET, "/user-service/admin/get-user/{id}").access(anyOf(hasAuthority("ADMIN"), hasIpAddress("192.168.100.186")));
         http.authorizeHttpRequests().requestMatchers(POST, "/user-service/user/login").permitAll();
         http.authorizeHttpRequests().requestMatchers(POST, "/user-service/user/recover-password").permitAll();
+        http.authorizeHttpRequests().requestMatchers(PATCH, "/user-service/user/set-new-password").permitAll();
         http.authorizeHttpRequests().requestMatchers("/user-service/user/**").hasAnyAuthority("ADMIN", "CUSTOMER");
         http.authorizeHttpRequests().requestMatchers("/swagger-ui/**").permitAll();
         http.authorizeHttpRequests().requestMatchers("/swagger-resources/**").permitAll();

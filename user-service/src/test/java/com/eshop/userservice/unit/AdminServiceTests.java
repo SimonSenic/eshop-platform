@@ -1,4 +1,4 @@
-package com.eshop.userservice.service;
+package com.eshop.userservice.unit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,6 +24,7 @@ import com.eshop.userservice.entity.User;
 import com.eshop.userservice.exception.BusinessException;
 import com.eshop.userservice.mapper.UserMapper;
 import com.eshop.userservice.repository.UserRepository;
+import com.eshop.userservice.service.AdminService;
 
 @SpringBootTest
 class AdminServiceTests {
@@ -75,9 +76,9 @@ class AdminServiceTests {
 		String verificationToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYXJyeXBvdHRlciIsInJvbGVzIjpbIkNVU1RPTUVSIl0sImlzcyI6Imh0dHA"
 				+ "6Ly9ob3N0LmRvY2tlci5pbnRlcm5hbDo4MDgwL3VzZXItc2VydmljZS91c2VyL2xvZ2luIiwiZXhwIjoxNjkyNjUzMTg0fQ.hQthbAFWTqIBrOsxIJI05__PX3BnVZhBES37baVWwfw";
 		
-		UpdateAdminDTO updateAdminDTO = UpdateAdminDTO.builder()
-				.username(USERNAME)
-				.password(PASSWORD).build();
+		UpdateAdminDTO updateAdminDTO = new UpdateAdminDTO();
+		updateAdminDTO.setUsername(USERNAME);
+		updateAdminDTO.setPassword(PASSWORD);
 		
 		when(environment.getProperty(anyString())).thenReturn("secret");
 		
