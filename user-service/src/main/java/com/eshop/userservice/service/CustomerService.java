@@ -29,9 +29,9 @@ public class CustomerService {
 	private final Environment environment;
 	
 	public UserDTO registerCustomer(UserDTO userDTO) {
-		if (userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
+		if (userRepository.existsByUsername(userDTO.getUsername())) {
 			throw new BusinessException("Username is already occupied");
-		}else if(userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
+		}else if(userRepository.existsByEmail(userDTO.getEmail())) {
 			throw new BusinessException("Email is already occupied");
 		}
 		

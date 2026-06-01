@@ -84,9 +84,9 @@ public class UserService implements UserDetailsService{
 			throw new BusinessException("New password must not be the same");
 		}
 		
-		if(userRepository.findByUsername(updateUserDTO.getUsername()).isPresent()){
+		if(userRepository.existsByUsername(updateUserDTO.getUsername())){
 			throw new BusinessException("Username is already occupied");
-		}else if(userRepository.findByEmail(updateUserDTO.getEmail()).isPresent()){
+		}else if(userRepository.existsByEmail(updateUserDTO.getEmail())){
 			throw new BusinessException("Email is already occupied");
 		}
 		

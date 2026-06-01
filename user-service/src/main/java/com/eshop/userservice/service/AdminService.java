@@ -29,7 +29,7 @@ public class AdminService {
 	private final Environment environment;
 	
 	public UserDTO createAdmin(UserEmailDTO userEmailDTO) {
-		if(userRepository.findByEmail(userEmailDTO.getEmail()).isPresent()) {
+		if(userRepository.existsByEmail(userEmailDTO.getEmail())) {
 			throw new BusinessException("Email is already occupied");
 		}
 		
@@ -51,7 +51,7 @@ public class AdminService {
                 		.orElseThrow(() -> new NotFoundException("User not found"));
                 if(user.getActive()){
         			throw new BusinessException("User was already activated");
-        		}else if(userRepository.findByUsername(updateAdminDTO.getUsername()).isPresent()){
+        		}else if(userRepository.existsByUsername(updateAdminDTO.getUsername())){
         			throw new BusinessException("Username is already occupied");
         		}
                 

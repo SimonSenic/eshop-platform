@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Date;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -16,12 +17,15 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
 
-import com.eshop.userservice.dto.UserEmailDTO;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.eshop.userservice.dto.UpdateAdminDTO;
 import com.eshop.userservice.dto.UserDTO;
+import com.eshop.userservice.dto.UserEmailDTO;
 import com.eshop.userservice.entity.Role;
 import com.eshop.userservice.entity.User;
 import com.eshop.userservice.exception.BusinessException;
+import com.eshop.userservice.exception.NotFoundException;
 import com.eshop.userservice.mapper.UserMapper;
 import com.eshop.userservice.repository.UserRepository;
 import com.eshop.userservice.service.AdminService;
@@ -48,6 +52,9 @@ class AdminServiceTests {
 	private final String LASTNAME = "Lastname";
 	private final String ADDRESS = "Address 123";
 	
+	private final String ENCODED_PASSWORD = "EncodedPassword";
+	private final String SECRET = "test-secret";
+	
 	@Test
 	void testSuccessfullyCreateAdmin() {
 		UserEmailDTO userEmailDTO = new UserEmailDTO();
@@ -72,15 +79,63 @@ class AdminServiceTests {
 	}
 	
 	@Test
-	void testFailCompleteRegistration() {
-		String verificationToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYXJyeXBvdHRlciIsInJvbGVzIjpbIkNVU1RPTUVSIl0sImlzcyI6Imh0dHA"
-				+ "6Ly9ob3N0LmRvY2tlci5pbnRlcm5hbDo4MDgwL3VzZXItc2VydmljZS91c2VyL2xvZ2luIiwiZXhwIjoxNjkyNjUzMTg0fQ.hQthbAFWTqIBrOsxIJI05__PX3BnVZhBES37baVWwfw";
+	void testFailCreateAdminWithAlreadyOccupiedEmail() {
+		UserEmailDTO userEmailDTO = new UserEmailDTO();
+		userEmailDTO.setEmail(EMAIL);
+		
+		when(userRepository.existsByEmail(anyString())).thenReturn(true);
+		
+		assertThrows(BusinessException.class, () -> adminService.createAdmin(userEmailDTO));
+	}
+	
+	@Test
+	void testSuccessfullyCompleteRegistration() {
+		User user = createAdminUser();
+		String verificationToken = generateVerificationToken(user);
 		
 		UpdateAdminDTO updateAdminDTO = new UpdateAdminDTO();
 		updateAdminDTO.setUsername(USERNAME);
 		updateAdminDTO.setPassword(PASSWORD);
 		
-		when(environment.getProperty(anyString())).thenReturn("secret");
+		User updatedUser = user;
+		updatedUser.setId(1L);
+		updatedUser.setUsername(USERNAME);
+		updatedUser.setPassword(PASSWORD);
+		
+		when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+		when(userMapper.updateAdmin(any(User.class), any(UpdateAdminDTO.class))).thenReturn(updatedUser);
+		when(environment.getProperty(anyString())).thenReturn(SECRET);
+		
+		adminService.completeRegistration(updateAdminDTO, verificationToken);
+		
+		verify(userRepository).save(any(User.class));
+	}
+	
+	@Test
+	void testFailCompleteRegistrationWithInvalidToken() {
+		User user = createAdminUser();
+		String verificationToken = generateExpiredVerificationToken(user);
+		
+		UpdateAdminDTO updateAdminDTO = new UpdateAdminDTO();
+		updateAdminDTO.setUsername(USERNAME);
+		updateAdminDTO.setPassword(PASSWORD);
+		
+		when(environment.getProperty(anyString())).thenReturn(SECRET);
+		
+		assertThrows(BusinessException.class, () -> adminService.completeRegistration(updateAdminDTO, verificationToken));
+	}
+	
+	@Test
+	void testFailCompleteRegistrationWithAlreadyOccupiedUsername() {
+		User user = createAdminUser();
+		String verificationToken = generateVerificationToken(user);
+		
+		UpdateAdminDTO updateAdminDTO = new UpdateAdminDTO();
+		updateAdminDTO.setUsername(USERNAME);
+		updateAdminDTO.setPassword(PASSWORD);
+		
+		when(userRepository.existsByUsername(anyString())).thenReturn(true);
+		when(environment.getProperty(anyString())).thenReturn(SECRET);
 		
 		assertThrows(BusinessException.class, () -> adminService.completeRegistration(updateAdminDTO, verificationToken));
 	}
@@ -90,7 +145,7 @@ class AdminServiceTests {
 		UserDTO userDTO = UserDTO.builder()
 				.id(1L)
         		.username(USERNAME)
-        		.password(PASSWORD)
+        		.password(ENCODED_PASSWORD)
         		.email(EMAIL)
         		.firstName(FIRSTNAME)
         		.lastName(LASTNAME)
@@ -105,8 +160,41 @@ class AdminServiceTests {
 		UserDTO result = adminService.getUser(1L);
 		
 		assertThat(result).isNotNull()
-		.extracting(UserDTO::getId, UserDTO::getUsername, UserDTO::getRole, UserDTO::getActive)
-		.containsExactly(1L, USERNAME, Role.CUSTOMER, true);
+		.extracting(UserDTO::getId, UserDTO::getUsername, UserDTO::getPassword, UserDTO::getRole, UserDTO::getActive)
+		.containsExactly(1L, USERNAME, ENCODED_PASSWORD, Role.CUSTOMER, true);
+	}
+	
+	@Test
+	void testFailGetUserWithInvalidId() {
+		assertThrows(NotFoundException.class, () -> adminService.getUser(500L));
+	}
+	
+	private User createAdminUser() {
+		User user = new User();
+		user.setEmail(EMAIL);
+		user.setRole(Role.ADMIN);
+		user.setActive(false);
+		return user;
+	}
+	
+	private String generateVerificationToken(User user) {
+		Algorithm algorithm = Algorithm.HMAC256("test-secret".getBytes());
+		String subject = user.getEmail();
+		
+	    return JWT.create()
+	    		.withSubject(subject)
+	    		.withExpiresAt(new Date(System.currentTimeMillis() + 1 * 60 * 60 * 1000))
+	            .sign(algorithm);
 	}
 
+	private String generateExpiredVerificationToken(User user) {
+		Algorithm algorithm = Algorithm.HMAC256("test-secret".getBytes());
+		String subject = user.getEmail();
+		
+	    return JWT.create()
+	    		.withSubject(subject)
+	    		.withExpiresAt(new Date(System.currentTimeMillis() - 1 * 60 * 60 * 1000))
+	            .sign(algorithm);
+	}
+	
 }
