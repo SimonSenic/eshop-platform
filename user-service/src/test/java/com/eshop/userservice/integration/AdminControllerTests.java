@@ -265,7 +265,7 @@ class AdminControllerTests extends AbstractIntegrationTests {
 		
 		mockMvc.perform(get("/user-service/admin/get-user/{id}", customerUser.getId())
 				.header(HttpHeaders.AUTHORIZATION, "Bearer " +customerUserJwt))
-                .andExpect(status().isForbidden()).andReturn();
+                .andExpect(status().isForbidden());
 	}
 	
 	private User createInactiveAdminUser() {

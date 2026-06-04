@@ -108,7 +108,7 @@ class UserServiceTests {
 	}
 	
 	@Test
-	void testFailUpdateWithAlreadyOccupyingUsername() {
+	void testFailUpdateWithAlreadyOccupiedUsername() {
 		User user = createUser();
 		
 		UpdateUserDTO updateUserDTO = UpdateUserDTO.builder()
@@ -123,7 +123,7 @@ class UserServiceTests {
 	}
 	
 	@Test
-	void testFailUpdateWithAlreadyOccupyingEmail() {
+	void testFailUpdateWithAlreadyOccupiedEmail() {
 		User user = createUser();
 		
 		UpdateUserDTO updateUserDTO = UpdateUserDTO.builder()

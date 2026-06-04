@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.eshop.storageservice.dto.ProductDTO;
+import com.eshop.storageservice.dto.UpdateProductDTO;
 import com.eshop.storageservice.service.StorageService;
 
 import jakarta.validation.Valid;
@@ -46,9 +47,9 @@ public class StorageController {
 	}
 	
 	@PatchMapping("/{id}/update")
-	public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @RequestPart @Valid ProductDTO productDTO, 
+	public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @RequestPart @Valid UpdateProductDTO updateProductDTO, 
 			@RequestPart(required = false) MultipartFile image) throws IOException{
-		return ResponseEntity.ok(storageService.updateProduct(id, productDTO, image));
+		return ResponseEntity.ok(storageService.updateProduct(id, updateProductDTO, image));
 	}
 	
 	@PostMapping("/{id}/order")

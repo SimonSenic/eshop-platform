@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.eshop.storageservice.dto.ProductDTO;
+import com.eshop.storageservice.dto.UpdateProductDTO;
 import com.eshop.storageservice.entity.Product;
 import com.eshop.storageservice.exception.BusinessException;
 import com.eshop.storageservice.exception.NotFoundException;
@@ -40,9 +41,9 @@ public class StorageService {
 	}
 	
 	public ProductDTO addProduct(ProductDTO productDTO, MultipartFile image) throws IOException{
-		if (storageRepository.findByName(productDTO.getName()).isPresent()) {
-			throw new BusinessException("Product already exists");
-		}else if(image != null && image.getSize() > 1 * 1024 * 1024) { //1 MB
+		if (storageRepository.existsByName(productDTO.getName())) {
+			throw new BusinessException("Product with such name already exists");
+		}else if(image != null && image.getSize() > 10 * 1024 * 1024) { //10 MB
 			throw new BusinessException("Maximum image size is 1 MB");
 		}
 		
@@ -54,14 +55,16 @@ public class StorageService {
 		return productMapper.toDTO(product);
 	}
 	
-	public ProductDTO updateProduct(Long id, ProductDTO productDTO, MultipartFile image) throws IOException {
+	public ProductDTO updateProduct(Long id, UpdateProductDTO updateProductDTO, MultipartFile image) throws IOException {
 		Product product = storageRepository.findById(id)
 				.orElseThrow(() -> new NotFoundException("Product not found"));
-		if(image != null && image.getSize() > 1 * 1024 * 1024) { //1 MB
+		if (!product.getName().equals(updateProductDTO.getName()) && storageRepository.existsByName(updateProductDTO.getName())) {
+			throw new BusinessException("Product with such name already exists");
+		}else if(image != null && image.getSize() > 1 * 1024 * 1024) { //1 MB
 			throw new BusinessException("Maximum image size is 1 MB");
 		}
 		
-		product = productMapper.updateProduct(product, productDTO);
+		product = productMapper.updateProduct(product, updateProductDTO);
 		product.setImage(image != null ? image.getBytes() : null);
 		storageRepository.save(product);
 		log.info("Product updated successfully (productId: {})", product.getId());

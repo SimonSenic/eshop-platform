@@ -195,7 +195,7 @@ public class UserControllerTests extends AbstractIntegrationTests {
 	}
 	
 	@Test
-	void testFailUpdateUserWithAlreadyOccupyingUsername() throws Exception {
+	void testFailUpdateUserWithAlreadyOccupiedUsername() throws Exception {
 		UpdateUserDTO updateUserDTO = buildUserUpdate(ADMIN_USERNAME, null, null, null);
 		
 		MvcResult mvcResult = mockMvc.perform(patch("/user-service/user/update")
@@ -209,7 +209,7 @@ public class UserControllerTests extends AbstractIntegrationTests {
 	}
 	
 	@Test
-	void testFailUpdateUserWithAlreadyOccupyingEmail() throws Exception {
+	void testFailUpdateUserWithAlreadyOccupiedEmail() throws Exception {
 		UpdateUserDTO updateUserDTO = buildUserUpdate(null, null, null, ADMIN_EMAIL);
 		
 		MvcResult mvcResult = mockMvc.perform(patch("/user-service/user/update")
